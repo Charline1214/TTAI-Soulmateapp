@@ -686,9 +686,15 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.user {
+        .message.user,
+        .message.user-message {
             align-self: flex-end;
             flex-direction: row-reverse;
+        }
+
+        .message.ai,
+        .message.ai-message {
+            align-self: flex-start;
         }
 
         .message-avatar {
@@ -711,11 +717,13 @@
             max-width: calc(100% - 52px);
         }
 
-        .message.user .message-content-wrapper {
+        .message.user .message-content-wrapper,
+        .message.user-message .message-content-wrapper {
             align-items: flex-end;
         }
 
-        .message.ai .message-content-wrapper {
+        .message.ai .message-content-wrapper,
+        .message.ai-message .message-content-wrapper {
             align-items: flex-start;
         }
 
@@ -731,13 +739,15 @@
         }
 
         /* 用户消息 - 绿色气泡 */
-        .message.user .message-content {
+        .message.user .message-content,
+        .message.user-message .message-content {
             background: #95ec69;
             border: none;
         }
 
         /* AI消息 - 白色气泡 */
-        .message.ai .message-content {
+        .message.ai .message-content,
+        .message.ai-message .message-content {
             background: #ffffff;
             border: 1px solid #e0e0e0;
         }
@@ -4133,17 +4143,23 @@
                         const clickHandler = hasAudio ? `onclick="event.stopPropagation(); playVoiceMessage('${item.voiceId}')"` : '';
                         const durationText = hasAudio ? `${estimatedDuration}"` : '加载失败';
                         const opacityStyle = hasAudio ? '' : 'opacity:0.6;';
+                        const avatarSrc = characterData.avatar || getDefaultAIAvatar();
                         msgDiv.innerHTML = `
-                            <div class="voice-message" ${clickHandler} style="${opacityStyle}">
-                                <div class="voice-bubble">
-                                    <div class="voice-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-                                    <div class="voice-waves">
-                                        <div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div>
-                                    </div>
-                                </div>
-                                <span class="voice-duration">${durationText}</span>
+                            <div class="message-avatar">
+                                <img src="${avatarSrc}" alt="Avatar" onclick="event.stopPropagation()">
                             </div>
-                            <div class="message-time">${item.time}</div>
+                            <div class="message-content-wrapper">
+                                <div class="voice-message" ${clickHandler} style="${opacityStyle}">
+                                    <div class="voice-bubble">
+                                        <div class="voice-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+                                        <div class="voice-waves">
+                                            <div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div>
+                                        </div>
+                                    </div>
+                                    <span class="voice-duration">${durationText}</span>
+                                </div>
+                                <div class="message-time">${item.time}</div>
+                            </div>
                             <div class="message-action-menu">
                                 <button class="message-action-btn" onclick="event.stopPropagation(); transcribeVoiceMessage(${i})">转文字</button>
                                 <button class="message-action-btn" onclick="event.stopPropagation(); collectMessage(${i})">收藏</button>
@@ -4163,7 +4179,13 @@
                         const msgDiv = document.createElement('div');
                         msgDiv.className = `message ${item.sender === 'user' ? 'user-message' : 'ai-message'}`;
                         msgDiv.dataset.index = i;
-                        let content = '';
+                        const avatarSrc = item.sender === 'user' ? (userData.avatar || getDefaultUserAvatar()) : (characterData.avatar || getDefaultAIAvatar());
+                        let content = `
+                            <div class="message-avatar">
+                                <img src="${avatarSrc}" alt="Avatar" onclick="event.stopPropagation()">
+                            </div>
+                            <div class="message-content-wrapper">
+                        `;
                         if (item.image) {
                             content += `<img src="${item.image}" style="max-width:200px;max-height:200px;border-radius:8px;margin-bottom:8px;display:block;" onclick="event.stopPropagation()">`;
                         }
@@ -4171,6 +4193,7 @@
                             content += `<div class="message-text">${escapeHtml(item.text)}</div>`;
                         }
                         content += `<div class="message-time">${item.time}</div>`;
+                        content += `</div>`;
                         content += `<div class="message-action-menu">
                             <button class="message-action-btn" onclick="event.stopPropagation(); collectMessage(${i})">收藏</button>
                             <button class="message-action-btn" onclick="event.stopPropagation(); deleteMessage(${i})">删除</button>
