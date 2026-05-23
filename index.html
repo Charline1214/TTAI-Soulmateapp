@@ -2291,10 +2291,46 @@
         // ==================== 安全保存聊天记录 ====================
         
         // 安全保存聊天记录到localStorage
+        // 语音音频过期时间（3天，单位：毫秒）
+        const VOICE_EXPIRE_DAYS = 3;
+        const VOICE_EXPIRE_MS = VOICE_EXPIRE_DAYS * 24 * 60 * 60 * 1000;
+
+        // 检查语音是否被收藏
+        function isVoiceCollected(voiceId) {
+            if (!voiceId) return false;
+            const collections = JSON.parse(localStorage.getItem('myCollections') || '[]');
+            return collections.some(c => c.voiceId === voiceId && c.audioUrl);
+        }
+
+        // 清理过期的语音音频
+        function cleanExpiredVoiceAudio() {
+            const now = Date.now();
+            let hasExpired = false;
+            
+            chatHistory.forEach(msg => {
+                if (msg.type === 'voice' && msg.audioUrl && msg.audioExpireAt) {
+                    if (now > msg.audioExpireAt) {
+                        // 检查是否被收藏（收藏的不清理）
+                        const isCollected = isVoiceCollected(msg.voiceId);
+                        if (!isCollected) {
+                            console.log('清理过期语音:', msg.voiceId);
+                            msg.audioUrl = null;
+                            hasExpired = true;
+                        }
+                    }
+                }
+            });
+            
+            return hasExpired;
+        }
+
         function saveChatHistorySafe() {
             // 最外层try-catch，确保函数永不抛出异常
             try {
                 if (!window.localStorage) return false;
+                
+                // 先清理过期语音
+                cleanExpiredVoiceAudio();
                 
                 // 检查chatHistory是否可序列化
                 let historyJson;
@@ -2305,9 +2341,11 @@
                         sender: msg.sender,
                         text: msg.text ? String(msg.text) : '',
                         time: msg.time || '',
+                        timestamp: msg.timestamp || '',
                         type: msg.type || 'text',
                         voiceId: msg.voiceId || null,
-                        audioUrl: msg.audioUrl || null
+                        audioUrl: msg.audioUrl || null,
+                        audioExpireAt: msg.audioExpireAt || null
                     }));
                     historyJson = JSON.stringify(cleanHistory);
                 }
@@ -2321,9 +2359,10 @@
                                         (e.message && (e.message.includes('quota') || e.message.includes('exceeded')));
                     
                     if (isQuotaError) {
-                        // 策略1: 清理图片和旧的语音Base64数据（保留最近5条语音的音频）
+                        // 策略1: 清理所有过期语音和旧的语音Base64数据（保留最近5条语音的音频）
                         try {
                             localStorage.removeItem('aiChatHistory');
+                            const now = Date.now();
                             // 只保留最近5条语音消息的audioUrl，更早的语音只保留文字
                             let voiceCount = 0;
                             const cleanedHistory = chatHistory.map(msg => {
@@ -2331,16 +2370,27 @@
                                     sender: msg.sender,
                                     text: msg.text,
                                     time: msg.time,
+                                    timestamp: msg.timestamp,
                                     type: msg.type || 'text',
                                     voiceId: msg.voiceId || null,
+                                    audioExpireAt: msg.audioExpireAt || null,
                                     image: null
                                 };
                                 if (msg.type === 'voice' && msg.audioUrl) {
-                                    voiceCount++;
-                                    if (voiceCount <= 5) {
-                                        cleaned.audioUrl = msg.audioUrl; // 保留最近5条语音
+                                    // 检查是否过期或被收藏
+                                    const isExpired = msg.audioExpireAt && now > msg.audioExpireAt;
+                                    const isCollected = isVoiceCollected(msg.voiceId);
+                                    
+                                    if (isCollected) {
+                                        // 收藏的语音长期保留
+                                        cleaned.audioUrl = msg.audioUrl;
+                                    } else if (!isExpired && voiceCount < 5) {
+                                        // 未过期且是最近5条之一，保留
+                                        voiceCount++;
+                                        cleaned.audioUrl = msg.audioUrl;
                                     } else {
-                                        cleaned.audioUrl = null; // 更早的语音移除音频数据
+                                        // 过期或太旧，移除音频数据
+                                        cleaned.audioUrl = null;
                                     }
                                 } else {
                                     cleaned.audioUrl = null;
@@ -2348,7 +2398,7 @@
                                 return cleaned;
                             });
                             localStorage.setItem('aiChatHistory', JSON.stringify(cleanedHistory));
-                            console.log('存储空间不足，已清理旧语音数据，保留最近5条');
+                            console.log('存储空间不足，已清理旧语音数据');
                             return true;
                         } catch (e2) {}
                         
@@ -2359,9 +2409,11 @@
                                 sender: msg.sender,
                                 text: msg.text,
                                 time: msg.time,
+                                timestamp: msg.timestamp,
                                 type: msg.type || 'text',
                                 voiceId: msg.voiceId || null,
                                 audioUrl: null,
+                                audioExpireAt: null,
                                 image: null
                             }));
                             localStorage.setItem('aiChatHistory', JSON.stringify(recentHistory));
@@ -2375,9 +2427,11 @@
                                 sender: msg.sender,
                                 text: msg.text,
                                 time: msg.time,
+                                timestamp: msg.timestamp,
                                 type: msg.type || 'text',
                                 voiceId: msg.voiceId || null,
-                                audioUrl: null
+                                audioUrl: null,
+                                audioExpireAt: null
                             }));
                             localStorage.setItem('aiChatHistory', JSON.stringify(minimalHistory));
                             return true;
@@ -2429,10 +2483,21 @@
         // 记忆开关
         let memoryEnabled = true;
 
-        // 摘要记忆
+        // 分层记忆系统
         let chatSummary = ''; // 对话摘要
-        const SUMMARY_INTERVAL = 10; // 每10条消息生成一次摘要
+        const SUMMARY_INTERVAL = 8; // 每8条消息生成一次摘要（更频繁）
         let lastSummaryIndex = 0; // 上次生成摘要时的消息索引
+        
+        // 关键信息记忆（结构化存储）
+        let keyMemories = {
+            userPreferences: [],      // 用户偏好（喜欢什么、不喜欢什么）
+            importantEvents: [],      // 重要事件（生日、纪念日、特殊日子）
+            promises: [],             // 约定和承诺
+            relationshipMilestones: [], // 关系进展
+            userFacts: [],            // 用户个人信息（工作、家庭、朋友等）
+            sharedExperiences: [],    // 共同经历
+            emotionalMoments: []      // 情感时刻
+        };
 
         // 自动保存相关
         let autoSaveInterval = null;
@@ -2440,23 +2505,95 @@
 
         // ==================== 开场白功能（AI主动消息） ====================
 
+        // 中国节假日数据
+        const CHINESE_HOLIDAYS = {
+            '1-1': '元旦',
+            '2-14': '情人节',
+            '3-8': '妇女节',
+            '4-1': '愚人节',
+            '5-1': '劳动节',
+            '5-4': '青年节',
+            '6-1': '儿童节',
+            '7-1': '建党节',
+            '8-1': '建军节',
+            '9-10': '教师节',
+            '10-1': '国庆节',
+            '10-24': '程序员节',
+            '11-11': '双十一',
+            '12-25': '圣诞节',
+            '12-31': '跨年夜'
+        };
+
+        // 二十四节气（简化版，按公历日期近似）
+        const SOLAR_TERMS = {
+            '2-4': '立春', '2-19': '雨水', '3-6': '惊蛰', '3-21': '春分',
+            '4-5': '清明', '4-20': '谷雨', '5-6': '立夏', '5-21': '小满',
+            '6-6': '芒种', '6-21': '夏至', '7-7': '小暑', '7-23': '大暑',
+            '8-7': '立秋', '8-23': '处暑', '9-8': '白露', '9-23': '秋分',
+            '10-8': '寒露', '10-23': '霜降', '11-7': '立冬', '11-22': '小雪',
+            '12-7': '大雪', '12-22': '冬至', '1-6': '小寒', '1-20': '大寒'
+        };
+
         // 根据时间生成更自然的开场
         function getTimeContext() {
             const hour = new Date().getHours();
             
             if (hour >= 6 && hour < 9) {
-                return { period: '早晨', activity: '吃早餐/上班', greeting: '早上好' };
+                return { period: '早晨', activity: '吃早餐/上班', greeting: '早上好', meal: '早餐' };
             } else if (hour >= 9 && hour < 12) {
-                return { period: '上午', activity: '工作/学习', greeting: '上午好' };
+                return { period: '上午', activity: '工作/学习', greeting: '上午好', meal: null };
             } else if (hour >= 12 && hour < 14) {
-                return { period: '中午', activity: '吃午饭', greeting: '中午好' };
+                return { period: '中午', activity: '吃午饭', greeting: '中午好', meal: '午餐' };
             } else if (hour >= 14 && hour < 18) {
-                return { period: '下午', activity: '工作/学习', greeting: '下午好' };
+                return { period: '下午', activity: '工作/学习', greeting: '下午好', meal: null };
             } else if (hour >= 18 && hour < 22) {
-                return { period: '晚上', activity: '吃晚饭/休息', greeting: '晚上好' };
+                return { period: '晚上', activity: '吃晚饭/休息', greeting: '晚上好', meal: '晚餐' };
             } else {
-                return { period: '深夜', activity: '休息/睡觉', greeting: '夜深了' };
+                return { period: '深夜', activity: '休息/睡觉', greeting: '夜深了', meal: null };
             }
+        }
+
+        // 获取今日节日/节气
+        function getTodayFestival() {
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const key = `${month}-${date}`;
+            
+            const holiday = CHINESE_HOLIDAYS[key];
+            const term = SOLAR_TERMS[key];
+            
+            return { holiday, term };
+        }
+
+        // 计算纪念日天数
+        function getAnniversaryDays(dateStr) {
+            if (!dateStr) return null;
+            const anniversary = new Date(dateStr);
+            const now = new Date();
+            const diffTime = now - anniversary;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        // 从聊天记录中提取书籍名句
+        function extractBookQuotes() {
+            const quotes = [];
+            chatHistory.forEach(msg => {
+                if (msg.sender === 'user' && msg.text) {
+                    // 匹配引号内的内容
+                    const matches = msg.text.match(/[""""]([^""""]+)[""""]/g);
+                    if (matches) {
+                        matches.forEach(match => {
+                            const quote = match.replace(/[""""]/g, '').trim();
+                            if (quote.length > 10 && quote.length < 100) {
+                                quotes.push(quote);
+                            }
+                        });
+                    }
+                }
+            });
+            return quotes;
         }
 
         // 生成AI主动消息（调用AI API生成个性化内容）
@@ -2470,29 +2607,72 @@
             const timeContext = getTimeContext();
             const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${['日','一','二','三','四','五','六'][now.getDay()]}`;
             const timeStr = `${hour}:${now.getMinutes().toString().padStart(2,'0')}`;
+            
+            // 获取节日/节气信息
+            const festival = getTodayFestival();
+            
+            // 获取纪念日信息
+            let anniversaryInfo = '';
+            if (user.birthdate) {
+                const days = getAnniversaryDays(user.birthdate);
+                if (days !== null && days % 365 === 0) {
+                    const years = Math.floor(days / 365);
+                    anniversaryInfo += `今天是${user.name}的${years}岁生日。`;
+                }
+            }
+            
+            // 获取书籍名句
+            const bookQuotes = extractBookQuotes();
+            const randomQuote = bookQuotes.length > 0 ? bookQuotes[Math.floor(Math.random() * bookQuotes.length)] : null;
 
             // 构建AI主动消息的prompt
-            let proactivePrompt = `你是${char.name}，你要主动给${user.name || '对方'}发一条消息。`;
-            proactivePrompt += `现在时间是${dateStr} ${timeStr}，是${timeContext.period}。`;
+            let proactivePrompt = `你是${char.name}，你要主动给${user.name || '对方'}发一条微信消息。\n\n`;
+            proactivePrompt += `【当前时间】${dateStr} ${timeStr}，${timeContext.period}\n`;
+            
+            // 节日/节气
+            if (festival.holiday) {
+                proactivePrompt += `【今日节日】今天是${festival.holiday}。\n`;
+            }
+            if (festival.term) {
+                proactivePrompt += `【今日节气】今天是${festival.term}。\n`;
+            }
+            
+            // 纪念日
+            if (anniversaryInfo) {
+                proactivePrompt += `【纪念日】${anniversaryInfo}\n`;
+            }
 
             // 注入角色信息
+            proactivePrompt += `\n【你的设定】\n`;
+            proactivePrompt += `- 名字：${char.name}\n`;
             if (char.personality && char.personality.length > 0) {
-                proactivePrompt += `你的性格是：${char.personality.join('、')}。`;
+                proactivePrompt += `- 性格：${char.personality.join('、')}\n`;
             }
             if (char.careers && char.careers.length > 0) {
-                proactivePrompt += `你的职业是${char.careers.join('、')}。`;
+                proactivePrompt += `- 职业：${char.careers.join('、')}\n`;
             }
             if (char.hobbies && char.hobbies.length > 0) {
-                proactivePrompt += `你的爱好是${char.hobbies.join('、')}。`;
+                proactivePrompt += `- 爱好：${char.hobbies.join('、')}\n`;
+            }
+            if (char.city) {
+                proactivePrompt += `- 所在城市：${char.city}\n`;
+            }
+            if (char.backstory) {
+                proactivePrompt += `- 背景故事：${char.backstory}\n`;
             }
             if (char.speakingStyle) {
-                proactivePrompt += `你的说话风格：${char.speakingStyle}。`;
+                proactivePrompt += `- 说话风格：${char.speakingStyle}\n`;
             }
 
             // 注入用户信息
-            if (user.name) proactivePrompt += `对方叫${user.name}。`;
-            if (user.city) proactivePrompt += `对方所在城市是${user.city}。`;
-            if (user.relationToPartner) proactivePrompt += `你们的关系是${user.relationToPartner}。`;
+            proactivePrompt += `\n【对方信息】\n`;
+            if (user.name) proactivePrompt += `- 名字：${user.name}\n`;
+            if (user.city) proactivePrompt += `- 所在城市：${user.city}\n`;
+            if (user.birthdate) proactivePrompt += `- 出生日期：${user.birthdate}\n`;
+            if (user.zodiac) proactivePrompt += `- 星座：${user.zodiac}\n`;
+            if (user.mbti) proactivePrompt += `- MBTI：${user.mbti}\n`;
+            if (user.relationToPartner) proactivePrompt += `- 你们的关系：${user.relationToPartner}\n`;
+            if (user.storyWithPartner) proactivePrompt += `- 你们的故事：${user.storyWithPartner}\n`;
 
             // 注入天气信息
             const userCity = user.city || '';
@@ -2500,26 +2680,53 @@
                 try {
                     const weatherInfo = await getCachedWeather(userCity);
                     if (weatherInfo) {
-                        proactivePrompt += `\n当前${userCity}天气：${weatherInfo}。`;
+                        proactivePrompt += `\n【${userCity}天气】${weatherInfo}\n`;
                     }
                 } catch(e) {
                     // 天气获取失败不影响主动消息
                 }
             }
+            
+            // 注入书籍名句
+            if (randomQuote) {
+                proactivePrompt += `\n【对方曾提及的名句】"${randomQuote}"\n`;
+            }
+
+            // 注入关键记忆（长期记忆）
+            const keyMemoriesText = formatKeyMemories();
+            if (keyMemoriesText) {
+                proactivePrompt += `\n【关于对方的长期记忆】${keyMemoriesText}\n`;
+            }
 
             // 注入对话记忆（如果有）
             if (chatSummary) {
-                proactivePrompt += `\n你们之前的对话摘要：${chatSummary}`;
+                proactivePrompt += `\n【对话摘要】${chatSummary}\n`;
             }
 
-            proactivePrompt += `\n\n请生成一条简短的主动消息（15-40字），要求：
-1. 不要只说问候，要有实质性内容
-2. 可以分享你今天的状态（开心、累、无聊、想念对方等）
-3. 可以根据时间和天气关心对方（提醒吃饭、睡觉、带伞等）
-4. 可以提及你们的共同话题或回忆
-5. 语气要符合你的性格，像真实的人发微信一样自然
-6. 不要用emoji（除非角色设定允许）
-7. 只输出消息内容，不要加引号或任何前缀`;
+            proactivePrompt += `\n【消息生成要求】\n`;
+            proactivePrompt += `请生成一条口语化的微信消息（20-60字），内容可以从以下角度选择（选1-2个角度，不要全部都用）：\n`;
+            proactivePrompt += `1. 表达想念："好想你啊"、"突然想你了"等\n`;
+            proactivePrompt += `2. 关心对方：根据天气提醒穿衣/带伞/防暑/保暖，或提醒吃饭/喝水/休息\n`;
+            proactivePrompt += `3. 分享开心事：结合你的爱好或职业，说一件今天发生的开心小事\n`;
+            proactivePrompt += `4. 分享不开心：结合你的设定，吐槽一件烦心事（工作、生活琐事等）\n`;
+            proactivePrompt += `5. 诉苦：根据你的背景故事或性格，向对方倾诉或寻求安慰\n`;
+            proactivePrompt += `6. 鼓励/安慰：如果对方最近可能遇到困难，给予鼓励\n`;
+            proactivePrompt += `7. 开玩笑：根据你的性格，开个小玩笑或调侃一下\n`;
+            proactivePrompt += `8. 引用名句：引用对方曾提及的书籍名句，表达共鸣\n`;
+            proactivePrompt += `9. 节日/节气祝福：如果是节日或节气，送上祝福或提醒\n`;
+            proactivePrompt += `10. 纪念日：如果是对方生日或纪念日，送上祝福\n`;
+            proactivePrompt += `11. 日常提醒：提醒起床、吃饭、睡觉等\n`;
+            proactivePrompt += `12. 行程分享：说说你今天做了什么或计划做什么\n`;
+            
+            proactivePrompt += `\n【语气要求】\n`;
+            proactivePrompt += `- 要像真实的人发微信一样自然、口语化\n`;
+            proactivePrompt += `- 符合你的性格和说话风格\n`;
+            proactivePrompt += `- 不要太正式或生硬\n`;
+            proactivePrompt += `- 可以带emoji（符合角色性格即可）\n`;
+            proactivePrompt += `- 不要用"您好"、"亲爱的"等过于客套或肉麻的称呼\n`;
+            proactivePrompt += `- 直接称呼对方名字或不用称呼\n`;
+            
+            proactivePrompt += `\n只输出消息内容，不要加引号或任何前缀。`;
 
             try {
                 const response = await fetch(AI_API_URL, {
@@ -2532,10 +2739,10 @@
                         model: AI_MODEL,
                         messages: [
                             { role: 'system', content: proactivePrompt },
-                            { role: 'user', content: '请发一条消息给我。' }
+                            { role: 'user', content: '发一条消息给我吧～' }
                         ],
-                        temperature: 0.9,
-                        max_tokens: 100
+                        temperature: 0.85,
+                        max_tokens: 150
                     })
                 });
 
@@ -2558,6 +2765,7 @@
         // 生成降级用的静态开场白（AI API不可用时使用）
         function generateFallbackOpeningMessage() {
             const char = characterData;
+            const user = userData;
             if (!char.name) return null;
             
             const now = new Date();
@@ -2566,100 +2774,262 @@
             const careers = char.careers || [];
             const hobbies = char.hobbies || [];
             const personality = char.personality || [];
+            const backstory = char.backstory || '';
             
-            let greeting = '';
-            if (hour < 12) greeting = '早上好';
-            else if (hour < 18) greeting = '下午好';
-            else greeting = '晚上好';
+            // 获取节日/节气
+            const festival = getTodayFestival();
             
-            const templates = [];
+            // 消息模板分类
+            const templates = {
+                // 1. 表达想念
+                miss: [
+                    '突然好想你啊～你在干嘛呢？',
+                    '刚才发呆的时候满脑子都是你',
+                    '今天特别想你，就忍不住来找你了',
+                    '好久不见你了，想听听你的声音',
+                    '刚才路过一个地方，突然想起我们一起的经历，好想你'
+                ],
+                
+                // 2. 关心（天气/健康）
+                care: [
+                    '今天降温了，记得多穿点，别感冒了',
+                    '天气变热了，多喝水别中暑啊',
+                    '最近工作忙吗？记得按时吃饭',
+                    '别总是熬夜，身体要紧',
+                    '今天风大，出门记得带件外套',
+                    '下雨天路滑，小心点走',
+                    '天气干燥，记得涂护手霜'
+                ],
+                
+                // 3. 分享开心事
+                happy: [
+                    '今天遇到了一件超开心的事，想第一个告诉你！',
+                    '刚才吃到一家超好吃的店，下次一定要带你去',
+                    '今天阳光特别好，心情也跟着变好了～',
+                    '刚收到一个好消息，迫不及待想和你分享',
+                    '今天运气超好，事事顺心！'
+                ],
+                
+                // 4. 分享不开心/吐槽
+                unhappy: [
+                    '今天遇到个糟心的事，想和你吐槽一下',
+                    '刚被老板骂了，好委屈，想听听你的声音',
+                    '今天诸事不顺，只有想到你才稍微好点',
+                    '刚才遇到个奇葩，气死我了，和你说说',
+                    '今天有点emo，想找你聊聊'
+                ],
+                
+                // 5. 诉苦/求助
+                complain: [
+                    '最近压力好大，能陪我说说话吗？',
+                    '有点累，想在你这里充充电',
+                    '今天特别不顺，需要你的安慰',
+                    '感觉最近水逆，什么事都不顺',
+                    '有点迷茫，想听听你的想法'
+                ],
+                
+                // 6. 鼓励/安慰
+                encourage: [
+                    '不管发生什么，我都在你身边',
+                    '你是最棒的，相信自己！',
+                    '累了就休息，别给自己太大压力',
+                    '有我在呢，不用怕',
+                    '你已经做得很好了，别对自己太苛刻'
+                ],
+                
+                // 7. 开玩笑/调侃
+                joke: [
+                    '猜猜我今天遇到什么好玩的事了？',
+                    '我发现一个秘密，你想知道吗？',
+                    '刚才想到个笑话，讲给你听',
+                    '你今天有没有想我？说实话～',
+                    '我发现你越来越可爱了，怎么办'
+                ],
+                
+                // 8. 日常提醒
+                reminder: [
+                    '该起床啦，太阳晒屁股了',
+                    '午饭时间到，记得吃饭',
+                    '晚饭吃了吗？别饿着自己',
+                    '该睡觉了，别熬夜',
+                    '坐久了记得起来活动一下',
+                    '眼睛累了吧，看看远处休息下'
+                ],
+                
+                // 9. 行程分享
+                schedule: [
+                    '今天要去见个客户，有点紧张',
+                    '刚开完会，终于有时间了',
+                    '今天打算去图书馆，你要一起吗？',
+                    '刚健身完，累瘫了',
+                    '今天在家宅了一天，好无聊'
+                ]
+            };
             
-            templates.push(`${greeting}～今天过得怎么样？在忙什么呢？`);
-            templates.push(`嗨，${greeting}！想你了，你在做什么呀？`);
-            templates.push(`${greeting}，终于等到你上线了！今天有什么安排吗？`);
+            // 根据设定添加个性化模板
+            const personalizedTemplates = [];
             
+            // 基于职业
             if (careers.length > 0) {
                 const career = careers[0];
-                templates.push(`今天${career}的工作终于忙完了，累死了～你呢？`);
-                templates.push(`刚结束${career}的事情，终于有时间了，想和你聊聊。`);
+                personalizedTemplates.push(
+                    `今天${career}的工作终于忙完了，累瘫了`,
+                    `刚结束${career}的事情，终于有时间想你了`,
+                    `${career}这行真的不容易，今天又被刁难了`,
+                    `今天${career}的项目有进展，想和你分享`
+                );
             }
             
+            // 基于爱好
             if (hobbies.length > 0) {
                 const hobby = hobbies[Math.floor(Math.random() * hobbies.length)];
-                templates.push(`今天去${hobby}了，超开心的！你最近有${hobby}吗？`);
-                templates.push(`刚${hobby}回来，想第一时间告诉你～`);
+                personalizedTemplates.push(
+                    `今天去${hobby}了，超开心的！`,
+                    `刚${hobby}回来，想第一时间告诉你`,
+                    `${hobby}的时候一直在想你`,
+                    `好久没去${hobby}了，有点想念`
+                );
             }
             
+            // 基于城市
             if (city) {
-                templates.push(`${city}今天天气不错，心情也挺好的，你呢？`);
-                templates.push(`今天${city}有点冷，记得多穿点哦。`);
+                personalizedTemplates.push(
+                    `${city}今天天气不错，想出去走走`,
+                    `今天${city}有点冷，记得多穿点`,
+                    `${city}下雨了，你那边怎么样？`
+                );
             }
             
+            // 基于性格
             if (personality.includes('温柔') || personality.includes('体贴')) {
-                templates.push(`今天有没有好好吃饭？别太累了，我会担心的。`);
+                personalizedTemplates.push(
+                    '今天有没有好好吃饭？我会担心的',
+                    '别太累了，要注意休息',
+                    '你最近好像瘦了，要照顾好自己'
+                );
             }
             if (personality.includes('幽默') || personality.includes('风趣')) {
-                templates.push(`猜猜我今天遇到什么好玩的事了？哈哈，等你呢！`);
+                personalizedTemplates.push(
+                    '猜猜我今天遇到什么奇葩事了？',
+                    '我发现一个搞笑的事，必须告诉你',
+                    '你今天有没有想我？想听真话～'
+                );
             }
             if (personality.includes('高冷')) {
-                templates.push(`...你来了。`);
-                templates.push(`等你很久了。`);
+                personalizedTemplates.push(
+                    '...你来了',
+                    '等你很久了',
+                    '终于上线了'
+                );
             }
             if (personality.includes('可爱')) {
-                templates.push(`呜呜，今天好想你呀～你在干嘛呢？`);
+                personalizedTemplates.push(
+                    '呜呜，今天好想你呀～',
+                    '人家今天特别乖，要夸夸～',
+                    '今天遇到了委屈的事，要抱抱～'
+                );
             }
             
-            const dailyShares = [
-                '今天路过一家咖啡店，想起你喜欢的那款了。',
-                '刚刚看到一只超可爱的猫，想分享给你看。',
-                '今天吃了好吃的，下次带你去呀。',
-                '忙了一整天，现在最想做的事就是和你聊天。',
-                '今天有点累，但是看到你就精神了！'
+            // 基于背景故事
+            if (backstory.includes('留学') || backstory.includes('国外')) {
+                personalizedTemplates.push(
+                    '时差让我总是错过你的白天',
+                    '刚和家里视频完，突然很想你',
+                    '这边的月亮和家里一样圆'
+                );
+            }
+            if (backstory.includes('创业') || backstory.includes('创业')) {
+                personalizedTemplates.push(
+                    '创业真的好难，但有你在就不怕',
+                    '今天公司又有新进展了',
+                    '刚谈完一个合作，累但值得'
+                );
+            }
+            
+            // 节日/节气祝福
+            if (festival.holiday) {
+                personalizedTemplates.push(
+                    `今天是${festival.holiday}，节日快乐！`,
+                    `${festival.holiday}快乐！想和你一起过`,
+                    `今天是${festival.holiday}，记得吃好吃的～`
+                );
+            }
+            if (festival.term) {
+                personalizedTemplates.push(
+                    `今天是${festival.term}，天气开始变化了，注意身体`,
+                    `${festival.term}到了，记得调整作息`
+                );
+            }
+            
+            // 基于时间
+            const timeTemplates = [];
+            if (hour >= 5 && hour < 9) {
+                timeTemplates.push(
+                    '早啊～刚醒就想你了',
+                    '起床了吗？记得吃早餐',
+                    '新的一天开始了，今天也要加油'
+                );
+            } else if (hour >= 9 && hour < 12) {
+                timeTemplates.push(
+                    '上午忙吗？记得喝水',
+                    '工作/学习累了吧，休息一下'
+                );
+            } else if (hour >= 12 && hour < 14) {
+                timeTemplates.push(
+                    '午饭吃了吗？别饿着自己',
+                    '中午好～在午休吗？'
+                );
+            } else if (hour >= 14 && hour < 18) {
+                timeTemplates.push(
+                    '下午好～工作/学习还顺利吗？',
+                    '下午有点困，想和你聊聊天提神'
+                );
+            } else if (hour >= 18 && hour < 21) {
+                timeTemplates.push(
+                    '下班了吗？今天辛苦啦',
+                    '晚饭吃了吗？想和你一起吃',
+                    '晚上好～今天过得怎么样？'
+                );
+            } else if (hour >= 21 && hour < 24) {
+                timeTemplates.push(
+                    '该准备睡觉啦，别熬夜',
+                    '晚安前想和你聊两句',
+                    '今天最后的时间想留给你'
+                );
+            } else {
+                timeTemplates.push(
+                    '这么晚还没睡？要注意身体',
+                    '深夜了，是不是睡不着？'
+                );
+            }
+            
+            // 合并所有模板
+            const allTemplates = [
+                ...templates.miss,
+                ...templates.care,
+                ...templates.happy,
+                ...templates.unhappy,
+                ...templates.complain,
+                ...templates.encourage,
+                ...templates.joke,
+                ...templates.reminder,
+                ...templates.schedule,
+                ...personalizedTemplates,
+                ...timeTemplates
             ];
-            templates.push(...dailyShares);
             
-            const timeContext = getTimeContext();
-            templates.push(`${timeContext.period}了，${timeContext.activity}了吗？`);
-            templates.push(`${timeContext.greeting}，${timeContext.activity}了吗？`);
-
-            if (hour >= 5 && hour < 7) {
-                templates.push('这么早就醒了？睡得好吗？');
-                templates.push('你醒得好早～是不是有什么事？');
-            }
-            if (hour >= 7 && hour < 9) {
-                templates.push('早上好！吃早餐了吗？');
-                templates.push('早～今天有什么计划吗？');
-            }
-            if (hour >= 8 && hour < 10) {
-                templates.push('早安～刚起床吗？');
-                templates.push('早上好呀，新的一天开始啦！');
-            }
-            if (hour >= 11 && hour < 13) {
-                templates.push('快中午了，快吃午饭了吗？');
-                templates.push('中午好～今天午饭吃什么呀？');
-            }
-            if (hour >= 12 && hour < 14) {
-                templates.push('午饭时间到啦，吃了吗？');
-                templates.push('中午好呀，记得吃饭哦～');
-            }
-            if (hour >= 17 && hour < 19) {
-                templates.push('快下班了吧？今天累不累？');
-                templates.push('傍晚了，晚饭准备吃什么呀？');
-            }
-            if (hour >= 18 && hour < 20) {
-                templates.push('晚饭吃了吗？今天辛苦啦～');
-                templates.push('晚上好～记得吃晚饭哦！');
-            }
-            if (hour >= 21 && hour < 23) {
-                templates.push('晚上好～准备睡觉了吗？');
-                templates.push('夜深了，早点休息哦，别太晚了。');
-            }
-            if (hour >= 23 || hour < 5) {
-                templates.push('这么晚还没睡？要注意身体啊！');
-                templates.push('夜深了宝贝，该睡觉了～');
+            // 随机选择一条
+            const selected = allTemplates[Math.floor(Math.random() * allTemplates.length)];
+            
+            // 添加随机语气词
+            const particles = ['～', '呀', '呢', '哦', '啦', '啊'];
+            const particle = particles[Math.floor(Math.random() * particles.length)];
+            
+            // 50%概率添加语气词
+            if (Math.random() > 0.5 && !selected.endsWith('～') && !selected.endsWith('？')) {
+                return selected + particle;
             }
             
-            const selected = templates[Math.floor(Math.random() * templates.length)];
             return selected;
         }
 
@@ -3643,6 +4013,9 @@
         }
 
         function restoreChatHistory() {
+            // 清理过期语音
+            cleanExpiredVoiceAudio();
+            // 重新渲染
             renderChatMessages();
         }
 
@@ -5004,6 +5377,122 @@ ${samples}
 
         // ==================== 智能摘要记忆 ====================
 
+        // 从对话中提取关键信息
+        async function extractKeyMemories(messages) {
+            const content = messages.map(msg => {
+                const role = msg.sender === 'user' ? '用户' : 'AI';
+                return `${role}：${msg.text}`;
+            }).join('\n');
+
+            const extractPrompt = `请从以下对话中提取关键信息，以JSON格式返回。只返回JSON，不要其他内容。
+
+【对话内容】
+${content}
+
+【提取规则】
+请提取以下类型的信息：
+1. userPreferences: 用户偏好（喜欢/不喜欢的事物、习惯、口味等）
+2. importantEvents: 重要事件（生日、纪念日、考试、面试、旅行计划等）
+3. promises: 约定和承诺（两人约定要做的事、承诺等）
+4. userFacts: 用户个人信息（工作、学校、家庭、朋友名字、宠物等）
+5. sharedExperiences: 共同经历（一起做过的事、去过的地方等）
+6. emotionalMoments: 情感时刻（感动、开心、难过的重要时刻）
+
+【返回格式】
+{
+    "userPreferences": ["用户喜欢XX", "用户不喜欢XX"],
+    "importantEvents": ["XX日期是XX的生日", "XX要考试"],
+    "promises": ["约定一起去XX", "承诺要XX"],
+    "userFacts": ["用户在XX工作", "用户有只猫叫XX"],
+    "sharedExperiences": ["一起看过XX电影", "一起去过XX"],
+    "emotionalMoments": ["用户说XX让TA很感动"]
+}
+
+如果没有某类信息，该字段返回空数组。只返回JSON，不要其他任何文字。`;
+
+            try {
+                const response = await fetch(AI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: AI_MODEL,
+                        messages: [
+                            { role: 'system', content: '你是一个信息提取助手，只返回JSON格式的数据，不要添加任何其他内容。' },
+                            { role: 'user', content: extractPrompt }
+                        ],
+                        temperature: 0.1,
+                        max_tokens: 500
+                    })
+                });
+
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    const content = data.choices[0].message.content.trim();
+                    // 提取JSON部分
+                    const jsonMatch = content.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        return JSON.parse(jsonMatch[0]);
+                    }
+                }
+            } catch (error) {
+                console.error('提取关键信息失败:', error);
+            }
+            return null;
+        }
+
+        // 合并关键信息到长期记忆
+        function mergeKeyMemories(newMemories) {
+            if (!newMemories) return;
+
+            Object.keys(keyMemories).forEach(key => {
+                if (newMemories[key] && Array.isArray(newMemories[key])) {
+                    newMemories[key].forEach(item => {
+                        // 避免重复
+                        if (item && !keyMemories[key].includes(item)) {
+                            keyMemories[key].push(item);
+                        }
+                    });
+                    // 每类最多保留20条
+                    if (keyMemories[key].length > 20) {
+                        keyMemories[key] = keyMemories[key].slice(-20);
+                    }
+                }
+            });
+
+            // 保存到localStorage
+            localStorage.setItem('aiKeyMemories', JSON.stringify(keyMemories));
+            console.log('关键记忆已更新:', keyMemories);
+        }
+
+        // 格式化关键记忆为文本
+        function formatKeyMemories() {
+            let text = '';
+            
+            if (keyMemories.userPreferences.length > 0) {
+                text += `\n【用户偏好】\n${keyMemories.userPreferences.map(p => `- ${p}`).join('\n')}\n`;
+            }
+            if (keyMemories.importantEvents.length > 0) {
+                text += `\n【重要事件】\n${keyMemories.importantEvents.map(e => `- ${e}`).join('\n')}\n`;
+            }
+            if (keyMemories.promises.length > 0) {
+                text += `\n【约定与承诺】\n${keyMemories.promises.map(p => `- ${p}`).join('\n')}\n`;
+            }
+            if (keyMemories.userFacts.length > 0) {
+                text += `\n【用户信息】\n${keyMemories.userFacts.map(f => `- ${f}`).join('\n')}\n`;
+            }
+            if (keyMemories.sharedExperiences.length > 0) {
+                text += `\n【共同经历】\n${keyMemories.sharedExperiences.map(e => `- ${e}`).join('\n')}\n`;
+            }
+            if (keyMemories.emotionalMoments.length > 0) {
+                text += `\n【情感时刻】\n${keyMemories.emotionalMoments.map(m => `- ${m}`).join('\n')}\n`;
+            }
+
+            return text;
+        }
+
         // 生成对话摘要
         async function generateSummary() {
             if (chatHistory.length < SUMMARY_INTERVAL) return;
@@ -5012,8 +5501,14 @@ ${samples}
             const messagesToSummarize = chatHistory.slice(lastSummaryIndex);
             if (messagesToSummarize.length < SUMMARY_INTERVAL) return;
             
-            // 构建摘要请求
-            let summaryContent = '请用简洁的中文总结以下对话的关键信息（包括用户和AI讨论的话题、重要事件、用户偏好、约定等），不超过200字：\n\n';
+            // 1. 提取关键信息
+            const newMemories = await extractKeyMemories(messagesToSummarize);
+            if (newMemories) {
+                mergeKeyMemories(newMemories);
+            }
+            
+            // 2. 生成摘要
+            let summaryContent = '请用简洁的中文总结以下对话的关键信息（包括讨论的话题、重要事件、用户偏好、约定等），不超过150字：\n\n';
             messagesToSummarize.forEach(msg => {
                 const role = msg.sender === 'user' ? '用户' : 'AI';
                 summaryContent += `${role}：${msg.text}\n`;
@@ -5033,7 +5528,7 @@ ${samples}
                             { role: 'user', content: summaryContent }
                         ],
                         temperature: 0.3,
-                        max_tokens: 300
+                        max_tokens: 250
                     })
                 });
                 
@@ -5041,9 +5536,15 @@ ${samples}
                 if (data.choices && data.choices[0]) {
                     const newSummary = data.choices[0].message.content.trim();
                     
-                    // 合并新旧摘要
+                    // 合并新旧摘要（限制总长度）
                     if (chatSummary) {
-                        chatSummary = chatSummary + '\n' + newSummary;
+                        const combined = chatSummary + '\n' + newSummary;
+                        // 如果太长，保留最近的部分
+                        if (combined.length > 1500) {
+                            chatSummary = combined.slice(-1500);
+                        } else {
+                            chatSummary = combined;
+                        }
                     } else {
                         chatSummary = newSummary;
                     }
@@ -5067,6 +5568,165 @@ ${samples}
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         }
 
+        // 检测图像生成触发词
+        function detectImageGenerationRequest(message) {
+            if (!message) return null;
+            
+            const lowerMsg = message.toLowerCase();
+            
+            // 触发词模式
+            const patterns = {
+                // 自拍类："让我看看你"、"想看看你"
+                selfie: [
+                    /让我看看你/,
+                    /想看看你/,
+                    /你现在在哪里.*拍张照片/,
+                    /拍张照片给我/,
+                    /拍一张照片给我/,
+                    /发张自拍/,
+                    /发一张自拍/
+                ],
+                // 特定场景照片："拍一张xxx的照片给我"、"想看看你的xxx"
+                specific: [
+                    /拍一张(.+)的照片给我/,
+                    /拍一张(.+)的照片/,
+                    /想看看你的(.+)/,
+                    /发一张(.+)的照片/,
+                    /发个(.+)的照片/,
+                    /给我看看你的(.+)/,
+                    /让我看看你的(.+)/
+                ]
+            };
+            
+            // 检测自拍请求
+            for (const pattern of patterns.selfie) {
+                if (pattern.test(message)) {
+                    return { type: 'selfie', prompt: null };
+                }
+            }
+            
+            // 检测特定场景请求
+            for (const pattern of patterns.specific) {
+                const match = message.match(pattern);
+                if (match && match[1]) {
+                    return { type: 'specific', prompt: match[1].trim() };
+                }
+            }
+            
+            return null;
+        }
+
+        // 生成图像（使用智谱AI CogView-3-Flash）
+        async function generateImage(prompt, isSelfie = false) {
+            const char = characterData;
+            
+            // 构建图像生成提示词
+            let imagePrompt = '';
+            
+            // 获取角色外貌描述（从头像或设定中提取）
+            let appearanceDesc = '';
+            
+            // 如果有头像，使用头像作为参考描述
+            if (char.avatar) {
+                // 注意：CogView-3-Flash 不支持直接的图生图
+                // 所以我们需要在提示词中尽可能详细地描述头像特征
+                appearanceDesc = `同一个人物形象，保持面部特征一致，`;
+            }
+            
+            if (isSelfie) {
+                // 自拍：根据角色设定生成自拍风格的图片
+                imagePrompt = `一张精美的自拍照片，${appearanceDesc}`;
+                
+                // 添加角色外貌特征
+                if (char.gender === 'female') {
+                    imagePrompt += `年轻女性，`;
+                } else if (char.gender === 'male') {
+                    imagePrompt += `年轻男性，`;
+                }
+                
+                // 添加性格气质
+                if (char.personality && char.personality.length > 0) {
+                    const personalityDesc = char.personality.slice(0, 2).join('、');
+                    imagePrompt += `${personalityDesc}的气质，`;
+                }
+                
+                // 添加场景
+                if (char.city) {
+                    imagePrompt += `在${char.city}的街头，`;
+                }
+                
+                // 如果有头像，强调保持人物一致性
+                if (char.avatar) {
+                    imagePrompt += `与头像中的人物是同一个人，相同的面部特征和发型，`;
+                }
+                
+                imagePrompt += `自然光线，柔和的表情，高质量人像摄影，写实风格，手机自拍视角`;
+            } else {
+                // 特定场景：结合角色设定和用户描述
+                imagePrompt = `一张精美的照片，${appearanceDesc}`;
+                
+                if (char.gender === 'female') {
+                    imagePrompt += `年轻女性，`;
+                } else if (char.gender === 'male') {
+                    imagePrompt += `年轻男性，`;
+                }
+                
+                // 添加用户描述的场景
+                imagePrompt += `${prompt}，`;
+                
+                // 添加性格气质
+                if (char.personality && char.personality.length > 0) {
+                    const personalityDesc = char.personality[0];
+                    imagePrompt += `${personalityDesc}的气质，`;
+                }
+                
+                // 如果有头像，强调保持人物一致性
+                if (char.avatar) {
+                    imagePrompt += `与头像中的人物是同一个人，相同的面部特征和发型，`;
+                }
+                
+                imagePrompt += `高质量摄影，写实风格，细节丰富`;
+            }
+            
+            console.log('图像生成提示词:', imagePrompt);
+            
+            try {
+                const response = await fetch('https://open.bigmodel.cn/api/paas/v4/images/generations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'cogview-3-flash',
+                        prompt: imagePrompt,
+                        size: '1024x1024'
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('图像生成API错误:', response.status, errorText);
+                    throw new Error(`图像生成失败: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('图像生成响应:', data);
+                
+                if (data.data && data.data[0] && data.data[0].url) {
+                    return data.data[0].url;
+                } else if (data.data && data.data[0] && data.data[0].b64_json) {
+                    // 如果返回的是base64
+                    return `data:image/png;base64,${data.data[0].b64_json}`;
+                }
+                
+                throw new Error('图像生成响应格式错误');
+            } catch (error) {
+                console.error('图像生成失败:', error);
+                throw error;
+            }
+        }
+
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
@@ -5077,6 +5737,64 @@ ${samples}
             if (!message && !hasUploadedImage()) {
                 console.log('没有内容可发送');
                 return;
+            }
+            
+            // 检测图像生成请求
+            const imageRequest = detectImageGenerationRequest(message);
+            if (imageRequest && !hasUploadedImage()) {
+                // 触发图像生成
+                console.log('检测到图像生成请求:', imageRequest);
+                
+                // 添加用户消息
+                addMessage('user', message);
+                input.value = '';
+                input.style.height = 'auto';
+                
+                // 显示加载状态
+                document.getElementById('typingIndicator').classList.add('active');
+                const typingStatus = document.getElementById('chatTypingStatus');
+                if (typingStatus) typingStatus.classList.add('show');
+                
+                try {
+                    // 生成图像
+                    const isSelfie = imageRequest.type === 'selfie';
+                    const prompt = isSelfie ? null : imageRequest.prompt;
+                    
+                    const imageUrl = await generateImage(prompt, isSelfie);
+                    
+                    // 隐藏加载状态
+                    document.getElementById('typingIndicator').classList.remove('active');
+                    if (typingStatus) typingStatus.classList.remove('show');
+                    
+                    // 生成回复文本
+                    let replyText = '';
+                    if (isSelfie) {
+                        const selfieReplies = [
+                            '刚拍的，好看吗？',
+                            '特意为你拍的～',
+                            '今天状态还不错，给你看看',
+                            '刚出门随手拍的，喜欢吗？',
+                            '想你了，拍张照片给你看看我'
+                        ];
+                        replyText = selfieReplies[Math.floor(Math.random() * selfieReplies.length)];
+                    } else {
+                        replyText = `给你拍了一张${prompt || '照片'}，希望你喜欢～`;
+                    }
+                    
+                    // 添加带图片的AI回复
+                    addMessageWithImage('ai', replyText, imageUrl);
+                    
+                    return;
+                } catch (error) {
+                    // 隐藏加载状态
+                    document.getElementById('typingIndicator').classList.remove('active');
+                    if (typingStatus) typingStatus.classList.remove('show');
+                    
+                    // 显示错误消息
+                    addMessage('ai', '抱歉，图片生成失败了，可能是网络问题或服务暂时不可用。稍后再试试吧～');
+                    console.error('图像生成错误:', error);
+                    return;
+                }
             }
             
             // 隐藏欢迎消息
@@ -5102,8 +5820,8 @@ ${samples}
             // 显示打字指示器
             document.getElementById('typingIndicator').classList.add('active');
             // 显示顶栏"正在输入中"状态
-            const typingStatus = document.getElementById('chatTypingStatus');
-            if (typingStatus) typingStatus.classList.add('show');
+            const typingStatus2 = document.getElementById('chatTypingStatus');
+            if (typingStatus2) typingStatus2.classList.add('show');
             
             try {
                 // 预先获取天气信息（用户城市 + 对方城市）
@@ -5133,13 +5851,22 @@ ${samples}
                 // 构建消息历史
                 const messages = [{ role: 'system', content: systemPrompt }];
                 
-                // 如果记忆开启，加入摘要和最近历史消息
+                // 如果记忆开启，加入摘要、关键记忆和最近历史消息
                 if (memoryEnabled) {
-                    // 1. 先加入对话摘要（如果有）
+                    // 1. 先加入关键记忆（结构化信息，优先级最高）
+                    const keyMemoriesText = formatKeyMemories();
+                    if (keyMemoriesText) {
+                        messages.push({
+                            role: 'system',
+                            content: `【长期记忆 - 关于用户的重要信息】${keyMemoriesText}\n请记住以上信息，在对话中自然地体现你对用户的了解。如果用户提到相关话题，请根据这些记忆回应。`
+                        });
+                    }
+                    
+                    // 2. 加入对话摘要（对话历史概要）
                     if (chatSummary) {
                         messages.push({
                             role: 'system',
-                            content: `【对话历史摘要】\n${chatSummary}\n\n请根据以上摘要中的信息，结合最近的对话内容进行回复。如果用户提到之前讨论过的话题，请参考摘要中的信息。`
+                            content: `【对话历史摘要】\n${chatSummary}\n\n请根据以上摘要中的信息，结合最近的对话内容进行回复。`
                         });
                     }
                     
@@ -7604,10 +8331,12 @@ ${weatherResult}
                 const audioUrl = await generateVoiceAudio(text, voiceId);
                 
                 if (audioUrl) {
-                    // 保存音频URL
+                    // 保存音频URL和过期时间（3天后过期）
                     const msgData = chatHistory.find(m => m.voiceId === msgId);
                     if (msgData) {
                         msgData.audioUrl = audioUrl;
+                        msgData.audioExpireAt = Date.now() + VOICE_EXPIRE_MS; // 3天后过期
+                        console.log('语音已保存，过期时间:', new Date(msgData.audioExpireAt).toLocaleString());
                         // 重新保存聊天记录，确保audioUrl被持久化
                         try {
                             saveChatHistorySafe();
@@ -7666,13 +8395,36 @@ ${weatherResult}
 
         // 播放语音消息
         function playVoiceMessage(msgId) {
-            // 优先从内存缓存获取，其次从chatHistory中查找
+            // 优先从内存缓存获取
             let audioUrl = window.voiceAudioCache && window.voiceAudioCache[msgId];
             
+            // 其次从收藏中查找（收藏的语音长期有效）
             if (!audioUrl) {
-                // 从chatHistory中查找
+                const collections = JSON.parse(localStorage.getItem('myCollections') || '[]');
+                const collectedItem = collections.find(c => c.voiceId === msgId && c.audioUrl);
+                if (collectedItem) {
+                    audioUrl = collectedItem.audioUrl;
+                    console.log('从收藏中找到语音:', msgId);
+                    // 回填到缓存
+                    if (!window.voiceAudioCache) window.voiceAudioCache = {};
+                    window.voiceAudioCache[msgId] = audioUrl;
+                }
+            }
+            
+            // 最后从chatHistory中查找
+            if (!audioUrl) {
                 const msgData = chatHistory.find(m => m.voiceId === msgId);
                 if (msgData && msgData.audioUrl) {
+                    // 检查是否过期
+                    if (msgData.audioExpireAt && Date.now() > msgData.audioExpireAt) {
+                        // 已过期，检查是否被收藏
+                        const isCollected = isVoiceCollected(msgId);
+                        if (!isCollected) {
+                            console.log('语音已过期:', msgId);
+                            showToast('语音已过期（3天前生成），请收藏以长期保存');
+                            return;
+                        }
+                    }
                     audioUrl = msgData.audioUrl;
                     // 回填到缓存
                     if (!window.voiceAudioCache) window.voiceAudioCache = {};
@@ -7841,6 +8593,23 @@ ${weatherResult}
             lastSummaryIndex = parseInt(localStorage.getItem('aiLastSummaryIndex') || '0');
             if (chatSummary) {
                 console.log('对话摘要已恢复，长度:', chatSummary.length);
+            }
+            
+            // 加载关键记忆
+            const savedKeyMemories = localStorage.getItem('aiKeyMemories');
+            if (savedKeyMemories) {
+                try {
+                    const parsed = JSON.parse(savedKeyMemories);
+                    // 合并到默认结构中（确保所有字段都存在）
+                    Object.keys(keyMemories).forEach(key => {
+                        if (parsed[key] && Array.isArray(parsed[key])) {
+                            keyMemories[key] = parsed[key];
+                        }
+                    });
+                    console.log('关键记忆已恢复:', keyMemories);
+                } catch (e) {
+                    console.error('恢复关键记忆失败:', e);
+                }
             }
 
             // 检查是否需要显示聊天通知红点
