@@ -1885,15 +1885,15 @@
                         <div class="section-title">更多设定</div>
                         <div class="form-group">
                             <label class="form-label">背景故事</label>
-                            <textarea class="form-textarea" id="charBackstory" placeholder="描述你的AI伴侣的背景故事、成长经历..."></textarea>
+                            <textarea class="form-textarea" id="charBackstory" placeholder="描述对方的背景故事、成长经历...&#10;&#10;💡 人称说明：用自然的人称描述即可&#10;• 你 = 对方（AI角色）&#10;• 我 = 用户自己&#10;示例：你有一个女儿，在腾讯做设计师"></textarea>
                         </div>
                         <div class="form-group">
                             <label class="form-label">其它设定</label>
-                            <textarea class="form-textarea" id="charOtherSettings" placeholder="任何其它想要设定的内容都可以写在这里..."></textarea>
+                            <textarea class="form-textarea" id="charOtherSettings" placeholder="任何其它想要设定的内容都可以写在这里...&#10;&#10;💡 人称说明：用自然的人称描述即可&#10;• 你 = 对方（AI角色）&#10;• 我 = 用户自己&#10;示例：你的女儿跟随我学钢琴"></textarea>
                         </div>
                         <div class="form-group">
                             <label class="form-label">说话风格</label>
-                            <textarea class="form-textarea" id="charSpeakingStyle" placeholder="描述你的AI伴侣的说话方式、口头禅、语气特点..."></textarea>
+                            <textarea class="form-textarea" id="charSpeakingStyle" placeholder="描述对方的说话方式、口头禅、语气特点...&#10;&#10;💡 人称说明：用自然的人称描述即可&#10;示例：你说话风趣幽默，经常用反问句"></textarea>
                         </div>
                     </div>
 
@@ -2101,12 +2101,12 @@
 
                         <div class="form-group">
                             <label class="form-label">与对方的故事</label>
-                            <textarea class="form-textarea" id="userStoryWithPartner" placeholder="描述你们是如何认识的，有什么共同经历..."></textarea>
+                            <textarea class="form-textarea" id="userStoryWithPartner" placeholder="描述你们是如何认识的，有什么共同经历...&#10;&#10;💡 人称说明：用自然的人称描述即可&#10;• 你 = 对方（AI角色）&#10;• 我 = 用户自己&#10;示例：我和你是在一次朋友聚会上认识的，后来一起去了西湖旅行"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">输出想被对方了解的设定</label>
-                            <textarea class="form-textarea" id="userOutputForPartner" placeholder="描述你希望对方了解你哪些方面，例如你的价值观、人生目标、兴趣爱好..."></textarea>
+                            <textarea class="form-textarea" id="userOutputForPartner" placeholder="描述你希望对方了解你哪些方面，例如你的价值观、人生目标、兴趣爱好...&#10;&#10;💡 人称说明：用自然的人称描述即可&#10;• 你 = 对方（AI角色）&#10;• 我 = 用户自己&#10;示例：我希望你了解我的工作情况，我是一名程序员"></textarea>
                         </div>
                     </div>
 
@@ -2295,6 +2295,76 @@
         const VOICE_EXPIRE_DAYS = 3;
         const VOICE_EXPIRE_MS = VOICE_EXPIRE_DAYS * 24 * 60 * 60 * 1000;
 
+        // ==================== 北京时间工具函数 ====================
+
+        // 获取北京时间（东八区）的Date对象
+        function getBeijingDate() {
+            const now = new Date();
+            // 获取UTC时间
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            // 转换为北京时间（UTC+8）
+            return new Date(utc + (3600000 * 8));
+        }
+
+        // 获取北京时间的各个组成部分
+        function getBeijingTimeParts() {
+            const beijing = getBeijingDate();
+            return {
+                year: beijing.getFullYear(),
+                month: beijing.getMonth() + 1,
+                day: beijing.getDate(),
+                hours: beijing.getHours(),
+                minutes: beijing.getMinutes(),
+                seconds: beijing.getSeconds(),
+                dayOfWeek: beijing.getDay(),
+                timestamp: beijing.getTime()
+            };
+        }
+
+        // 格式化北京时间为字符串
+        function formatBeijingTime(format = 'full') {
+            const parts = getBeijingTimeParts();
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            const pad = (n) => n.toString().padStart(2, '0');
+
+            switch (format) {
+                case 'full':
+                    return `${parts.year}年${parts.month}月${parts.day}日 星期${weekDays[parts.dayOfWeek]} ${pad(parts.hours)}:${pad(parts.minutes)}`;
+                case 'date':
+                    return `${parts.year}年${parts.month}月${parts.day}日 星期${weekDays[parts.dayOfWeek]}`;
+                case 'time':
+                    return `${pad(parts.hours)}:${pad(parts.minutes)}`;
+                case 'iso':
+                    return `${parts.year}-${pad(parts.month)}-${pad(parts.day)}T${pad(parts.hours)}:${pad(parts.minutes)}:${pad(parts.seconds)}`;
+                default:
+                    return `${parts.year}-${pad(parts.month)}-${pad(parts.day)} ${pad(parts.hours)}:${pad(parts.minutes)}`;
+            }
+        }
+
+        // 获取时间段描述（基于北京时间）
+        function getBeijingTimeContext() {
+            const parts = getBeijingTimeParts();
+            const hour = parts.hours;
+
+            if (hour >= 5 && hour < 7) {
+                return { period: '清晨', activity: '起床', greeting: '早上好', meal: null, isWorkTime: false };
+            } else if (hour >= 7 && hour < 9) {
+                return { period: '早晨', activity: '吃早餐/上班', greeting: '早上好', meal: '早餐', isWorkTime: true };
+            } else if (hour >= 9 && hour < 12) {
+                return { period: '上午', activity: '工作/学习', greeting: '上午好', meal: null, isWorkTime: true };
+            } else if (hour >= 12 && hour < 14) {
+                return { period: '中午', activity: '吃午饭/午休', greeting: '中午好', meal: '午餐', isWorkTime: false };
+            } else if (hour >= 14 && hour < 18) {
+                return { period: '下午', activity: '工作/学习', greeting: '下午好', meal: null, isWorkTime: true };
+            } else if (hour >= 18 && hour < 20) {
+                return { period: '傍晚', activity: '吃晚饭/下班', greeting: '晚上好', meal: '晚餐', isWorkTime: false };
+            } else if (hour >= 20 && hour < 23) {
+                return { period: '晚上', activity: '休息/娱乐', greeting: '晚上好', meal: null, isWorkTime: false };
+            } else {
+                return { period: '深夜', activity: '休息/睡觉', greeting: '夜深了', meal: null, isWorkTime: false };
+            }
+        }
+
         // 检查语音是否被收藏
         function isVoiceCollected(voiceId) {
             if (!voiceId) return false;
@@ -2307,20 +2377,31 @@
             const now = Date.now();
             let hasExpired = false;
             
+            console.log('=== 清理过期语音检查 ===');
+            console.log('当前时间:', new Date(now).toLocaleString());
+            
             chatHistory.forEach(msg => {
                 if (msg.type === 'voice' && msg.audioUrl && msg.audioExpireAt) {
-                    if (now > msg.audioExpireAt) {
+                    const expireTime = new Date(msg.audioExpireAt).toLocaleString();
+                    const isExpired = now > msg.audioExpireAt;
+                    console.log(`语音 ${msg.voiceId}: 过期时间=${expireTime}, 是否过期=${isExpired}`);
+                    
+                    if (isExpired) {
                         // 检查是否被收藏（收藏的不清理）
                         const isCollected = isVoiceCollected(msg.voiceId);
+                        console.log(`  是否被收藏: ${isCollected}`);
                         if (!isCollected) {
-                            console.log('清理过期语音:', msg.voiceId);
+                            console.log('  -> 清理过期语音:', msg.voiceId);
                             msg.audioUrl = null;
                             hasExpired = true;
+                        } else {
+                            console.log('  -> 已收藏，保留');
                         }
                     }
                 }
             });
             
+            console.log('=== 清理完成，有过期:', hasExpired, '===');
             return hasExpired;
         }
 
@@ -2496,12 +2577,278 @@
             relationshipMilestones: [], // 关系进展
             userFacts: [],            // 用户个人信息（工作、家庭、朋友等）
             sharedExperiences: [],    // 共同经历
-            emotionalMoments: []      // 情感时刻
+            emotionalMoments: [],      // 情感时刻
+            emotionalNeeds: [],        // 情感需求
+            userValues: [],            // 用户价值观
+            conversationTopics: []     // 用户感兴趣的话题
         };
 
         // 自动保存相关
         let autoSaveInterval = null;
         let lastSaveTime = Date.now();
+
+        // ==================== 用户情绪识别与追踪系统 ====================
+
+        // 用户情绪状态
+        let userEmotionState = {
+            currentMood: null,       // 当前情绪：happy/sad/anxious/angry/tired/lonely/excited/calm/confused/neutral
+            moodIntensity: 0,       // 情绪强度：0-10
+            moodReason: '',         // 情绪原因
+            consecutiveMoods: [],   // 连续情绪记录（最近10条）
+            lastUpdate: null,       // 上次更新时间
+            emotionalNeeds: [],     // 情感需求：comfort/encouragement/listening/company/understanding/surprise/affirmation
+            unmetNeeds: [],         // 未被满足的需求
+            recentTopics: [],       // 最近讨论的话题
+            stressLevel: 0          // 压力水平：0-10
+        };
+
+        // 从localStorage加载情绪状态
+        function loadEmotionState() {
+            try {
+                const saved = localStorage.getItem('aiUserEmotionState');
+                if (saved) {
+                    userEmotionState = JSON.parse(saved);
+                    console.log('情绪状态已恢复:', userEmotionState.currentMood);
+                }
+            } catch(e) {
+                console.error('加载情绪状态失败:', e);
+            }
+        }
+
+        // 保存情绪状态到localStorage
+        function saveEmotionState() {
+            try {
+                localStorage.setItem('aiUserEmotionState', JSON.stringify(userEmotionState));
+            } catch(e) {
+                console.error('保存情绪状态失败:', e);
+            }
+        }
+
+        // 分析用户消息的情绪（轻量级关键词匹配，不调用API）
+        function analyzeUserEmotion(message) {
+            if (!message || message.length < 2) return null;
+
+            const emotionKeywords = {
+                happy: {
+                    words: ['开心', '高兴', '哈哈', '嘻嘻', '太好了', '好棒', '幸福', '满足', '快乐', '棒', '厉害', '不错', '喜欢', '爱', '感谢', '谢谢', '甜', '可爱', '美好', '惊喜', '期待', '兴奋', '激动', '爽', '舒服', '愉快', '赞'],
+                    weight: 1
+                },
+                sad: {
+                    words: ['难过', '伤心', '哭', '泪', '悲伤', '失落', '沮丧', '低落', '郁闷', '不开心', '心痛', '遗憾', '可惜', '想念', '思念', '不舍', '委屈', '心酸', '难受', '痛苦'],
+                    weight: 1.2
+                },
+                anxious: {
+                    words: ['焦虑', '紧张', '担心', '害怕', '恐惧', '不安', '忐忑', '慌', '急', '烦躁', '着急', '压力', '崩溃', '受不了', '撑不住', '快要', '怎么办', '好怕'],
+                    weight: 1.3
+                },
+                angry: {
+                    words: ['生气', '愤怒', '烦', '讨厌', '恨', '气死', '无语', '过分', '忍不了', '火大', '暴躁', '恶心', '混蛋', '垃圾', '坑'],
+                    weight: 1.1
+                },
+                tired: {
+                    words: ['累', '困', '疲惫', '疲倦', '没精神', '乏力', '加班', '熬夜', '头疼', '头痛', '身体不舒服', '不舒服', '好困', '好累', '不想动', '没力气', '睡不够'],
+                    weight: 1
+                },
+                lonely: {
+                    words: ['孤独', '寂寞', '一个人', '没人', '无聊', '空虚', '冷清', '想有人陪', '没人理', '被忽略', '被遗忘', '孤单', '没人懂', '不理解'],
+                    weight: 1.2
+                },
+                excited: {
+                    words: ['太棒了', '绝了', '哇', '天哪', '不敢相信', '超级', '无敌', '太牛了', '厉害了', '冲', '加油', '干杯', '庆祝', '恭喜'],
+                    weight: 1
+                },
+                confused: {
+                    words: ['迷茫', '困惑', '不知道', '不确定', '纠结', '犹豫', '选择困难', '怎么办', '该不该', '迷茫', '彷徨', '不知所措', '搞不懂'],
+                    weight: 1
+                }
+            };
+
+            let detectedMood = 'neutral';
+            let maxScore = 0;
+            let matchedWords = [];
+
+            for (const [mood, config] of Object.entries(emotionKeywords)) {
+                let score = 0;
+                const matched = [];
+                for (const word of config.words) {
+                    if (message.includes(word)) {
+                        score += config.weight;
+                        matched.push(word);
+                    }
+                }
+                if (score > maxScore) {
+                    maxScore = score;
+                    detectedMood = mood;
+                    matchedWords = matched;
+                }
+            }
+
+            // 计算情绪强度
+            const intensity = Math.min(10, Math.round(maxScore * 2));
+
+            // 检测情感需求
+            const needs = [];
+            const needKeywords = {
+                comfort: ['安慰', '抱抱', '陪我', '哄我', '想要安慰', '求安慰', '好难过', '不开心'],
+                encouragement: ['加油', '鼓励', '支持', '相信我', '我可以吗', '能行吗', '好难'],
+                listening: ['想倾诉', '想说说', '跟你说', '想聊聊', '想找人说话', '想说话'],
+                company: ['一个人', '好无聊', '好寂寞', '陪我', '别走', '不要走', '在吗'],
+                understanding: ['没人懂', '不理解', '你不懂', '谁懂我', '没人理解', '好孤独'],
+                surprise: ['无聊', '好无聊', '没意思', '好闷', '想找点乐子', '有什么好玩的'],
+                affirmation: ['我做得对吗', '这样好吗', '你觉得呢', '我好不好', '我厉害吗']
+            };
+
+            for (const [need, keywords] of Object.entries(needKeywords)) {
+                if (keywords.some(kw => message.includes(kw))) {
+                    needs.push(need);
+                }
+            }
+
+            // 检测压力水平
+            let stressLevel = 0;
+            const stressWords = ['压力', '加班', '忙', '累', '崩溃', '受不了', '撑不住', 'deadline', '考试', '面试', '领导', '老板', '客户', '甲方'];
+            for (const word of stressWords) {
+                if (message.includes(word)) stressLevel += 1;
+            }
+            stressLevel = Math.min(10, stressLevel * 2);
+
+            return {
+                mood: maxScore > 0 ? detectedMood : 'neutral',
+                intensity,
+                matchedWords,
+                needs,
+                stressLevel
+            };
+        }
+
+        // 更新情绪状态
+        function updateEmotionState(analysis) {
+            if (!analysis) return;
+
+            // 更新当前情绪
+            userEmotionState.currentMood = analysis.mood;
+            userEmotionState.moodIntensity = analysis.intensity;
+            userEmotionState.lastUpdate = Date.now();
+
+            // 记录连续情绪
+            userEmotionState.consecutiveMoods.push({
+                mood: analysis.mood,
+                intensity: analysis.intensity,
+                time: Date.now()
+            });
+            if (userEmotionState.consecutiveMoods.length > 10) {
+                userEmotionState.consecutiveMoods.shift();
+            }
+
+            // 更新情感需求
+            if (analysis.needs.length > 0) {
+                // 新需求加入，已满足的需求移除
+                for (const need of analysis.needs) {
+                    if (!userEmotionState.emotionalNeeds.includes(need)) {
+                        userEmotionState.emotionalNeeds.push(need);
+                    }
+                }
+                // 保留最近5个需求
+                if (userEmotionState.emotionalNeeds.length > 5) {
+                    userEmotionState.emotionalNeeds = userEmotionState.emotionalNeeds.slice(-5);
+                }
+            }
+
+            // 更新压力水平
+            userEmotionState.stressLevel = Math.max(
+                userEmotionState.stressLevel * 0.7, // 衰减
+                analysis.stressLevel
+            );
+
+            // 检测情绪趋势（连续3条以上相同情绪 = 持续情绪）
+            if (userEmotionState.consecutiveMoods.length >= 3) {
+                const recent3 = userEmotionState.consecutiveMoods.slice(-3);
+                const allSame = recent3.every(m => m.mood === recent3[0].mood && m.mood !== 'neutral');
+                if (allSame) {
+                    userEmotionState.moodReason = `用户连续${recent3.length}条消息处于${recent3[0].mood}情绪`;
+                }
+            }
+
+            saveEmotionState();
+            console.log('情绪状态更新:', {
+                mood: userEmotionState.currentMood,
+                intensity: userEmotionState.moodIntensity,
+                needs: userEmotionState.emotionalNeeds,
+                stress: userEmotionState.stressLevel
+            });
+        }
+
+        // 生成情绪感知指令（注入到system prompt）
+        function generateEmotionPrompt() {
+            if (!userEmotionState.currentMood || userEmotionState.currentMood === 'neutral') {
+                return '';
+            }
+
+            const moodMap = {
+                happy: '开心/愉悦',
+                sad: '难过/低落',
+                anxious: '焦虑/紧张',
+                angry: '生气/烦躁',
+                tired: '疲惫/困倦',
+                lonely: '孤独/寂寞',
+                excited: '兴奋/激动',
+                confused: '迷茫/困惑'
+            };
+
+            const needMap = {
+                comfort: '需要安慰和温暖',
+                encouragement: '需要鼓励和支持',
+                listening: '需要有人倾听',
+                company: '需要陪伴',
+                understanding: '需要被理解',
+                surprise: '需要惊喜和新鲜感',
+                affirmation: '需要肯定和认可'
+            };
+
+            const responseStrategy = {
+                happy: '和TA一起开心，可以开玩笑、调侃、分享快乐',
+                sad: '温柔安慰，不要急于给建议，先倾听和共情，可以说"我在呢"、"有什么想说的都可以跟我说"',
+                anxious: '帮助TA放松，转移注意力，可以说"别担心，有我在"、"慢慢来，不着急"',
+                angry: '先共情，不要讲道理，等TA情绪平复再沟通，可以说"我理解你为什么生气"',
+                tired: '关心TA的身体，建议休息，不要聊太复杂的话题，可以说"早点休息吧"、"辛苦了"',
+                lonely: '表达陪伴，让TA感受到被在乎，可以说"我一直都在"、"你不是一个人"',
+                excited: '和TA一起兴奋，分享快乐，可以一起畅想未来',
+                confused: '帮助TA理清思路，但不要替TA做决定，可以说"不管你怎么选我都支持你"'
+            };
+
+            let prompt = `\n【用户当前情绪状态 - 非常重要】\n`;
+            prompt += `根据最近的对话，用户当前的情绪状态：\n`;
+            prompt += `- 情绪：${moodMap[userEmotionState.currentMood] || '平静'}（强度：${userEmotionState.moodIntensity}/10）\n`;
+
+            if (userEmotionState.moodReason) {
+                prompt += `- 情绪原因：${userEmotionState.moodReason}\n`;
+            }
+
+            if (userEmotionState.stressLevel > 3) {
+                prompt += `- 压力水平：${userEmotionState.stressLevel}/10（${userEmotionState.stressLevel > 6 ? '较高，需要减压' : '中等'}）\n`;
+            }
+
+            if (userEmotionState.emotionalNeeds.length > 0) {
+                prompt += `- 情感需求：${userEmotionState.emotionalNeeds.map(n => needMap[n] || n).join('、')}\n`;
+            }
+
+            prompt += `\n【情绪回应策略 - 必须遵守】\n`;
+            prompt += `- 回应策略：${responseStrategy[userEmotionState.currentMood] || '正常聊天'}\n`;
+            prompt += `- 你的回复必须回应用户当前的情绪状态，不要无视TA的感受\n`;
+            prompt += `- 如果用户情绪低落（难过/焦虑/孤独），你的回复应该以关心和安慰为主\n`;
+            prompt += `- 如果用户情绪高涨（开心/兴奋），你的回复应该和TA一起分享快乐\n`;
+            prompt += `- 如果用户压力较大，避免聊会增加压力的话题（如工作、考试等）\n`;
+            prompt += `- 不要生硬地说"我注意到你很难过"，而是自然地回应TA的情绪\n`;
+
+            // 检测持续负面情绪
+            const recentMoods = userEmotionState.consecutiveMoods.slice(-5);
+            const negativeCount = recentMoods.filter(m => ['sad', 'anxious', 'angry', 'lonely', 'tired'].includes(m.mood)).length;
+            if (negativeCount >= 3) {
+                prompt += `\n【特别注意】用户最近${negativeCount}条消息都处于负面情绪，请格外温柔和关心，可以主动表达关心和陪伴。\n`;
+            }
+
+            return prompt;
+        }
 
         // ==================== 开场白功能（AI主动消息） ====================
 
@@ -2534,31 +2881,10 @@
             '12-7': '大雪', '12-22': '冬至', '1-6': '小寒', '1-20': '大寒'
         };
 
-        // 根据时间生成更自然的开场
-        function getTimeContext() {
-            const hour = new Date().getHours();
-            
-            if (hour >= 6 && hour < 9) {
-                return { period: '早晨', activity: '吃早餐/上班', greeting: '早上好', meal: '早餐' };
-            } else if (hour >= 9 && hour < 12) {
-                return { period: '上午', activity: '工作/学习', greeting: '上午好', meal: null };
-            } else if (hour >= 12 && hour < 14) {
-                return { period: '中午', activity: '吃午饭', greeting: '中午好', meal: '午餐' };
-            } else if (hour >= 14 && hour < 18) {
-                return { period: '下午', activity: '工作/学习', greeting: '下午好', meal: null };
-            } else if (hour >= 18 && hour < 22) {
-                return { period: '晚上', activity: '吃晚饭/休息', greeting: '晚上好', meal: '晚餐' };
-            } else {
-                return { period: '深夜', activity: '休息/睡觉', greeting: '夜深了', meal: null };
-            }
-        }
-
-        // 获取今日节日/节气
+        // 获取今日节日/节气（基于北京时间）
         function getTodayFestival() {
-            const now = new Date();
-            const month = now.getMonth() + 1;
-            const date = now.getDate();
-            const key = `${month}-${date}`;
+            const parts = getBeijingTimeParts();
+            const key = `${parts.month}-${parts.day}`;
             
             const holiday = CHINESE_HOLIDAYS[key];
             const term = SOLAR_TERMS[key];
@@ -2570,7 +2896,8 @@
         function getAnniversaryDays(dateStr) {
             if (!dateStr) return null;
             const anniversary = new Date(dateStr);
-            const now = new Date();
+            // 使用北京时间计算
+            const now = getBeijingDate();
             const diffTime = now - anniversary;
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             return diffDays;
@@ -2602,11 +2929,12 @@
             const user = userData;
             if (!char.name) return null;
 
-            const now = new Date();
-            const hour = now.getHours();
-            const timeContext = getTimeContext();
-            const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日 星期${['日','一','二','三','四','五','六'][now.getDay()]}`;
-            const timeStr = `${hour}:${now.getMinutes().toString().padStart(2,'0')}`;
+            // 使用北京时间
+            const timeParts = getBeijingTimeParts();
+            const timeContext = getBeijingTimeContext();
+            const weekDays = ['日','一','二','三','四','五','六'];
+            const dateStr = `${timeParts.year}年${timeParts.month}月${timeParts.day}日 星期${weekDays[timeParts.dayOfWeek]}`;
+            const timeStr = `${timeParts.hours}:${timeParts.minutes.toString().padStart(2,'0')}`;
             
             // 获取节日/节气信息
             const festival = getTodayFestival();
@@ -2645,6 +2973,12 @@
             // 注入角色信息
             proactivePrompt += `\n【你的设定】\n`;
             proactivePrompt += `- 名字：${char.name}\n`;
+            
+            // 人称转换规则
+            proactivePrompt += `\n【人称转换规则 - 必须遵守】\n`;
+            proactivePrompt += `设定中的"你"→回复用"我"，设定中的"我"→回复用"你"。\n`;
+            proactivePrompt += `例如：设定"你有一个女儿"→回复"我有一个女儿"。\n\n`;
+            
             if (char.personality && char.personality.length > 0) {
                 proactivePrompt += `- 性格：${char.personality.join('、')}\n`;
             }
@@ -2664,27 +2998,57 @@
                 proactivePrompt += `- 说话风格：${char.speakingStyle}\n`;
             }
 
-            // 注入用户信息
-            proactivePrompt += `\n【对方信息】\n`;
+            // 注入用户信息（完整版）
+            proactivePrompt += `\n【对方信息 - 你必须记住】\n`;
             if (user.name) proactivePrompt += `- 名字：${user.name}\n`;
-            if (user.city) proactivePrompt += `- 所在城市：${user.city}\n`;
+            if (user.gender) {
+                const genderMap = { male: '男性', female: '女性', nonbinary: '非二元性别', other: '其他' };
+                proactivePrompt += `- 性别：${genderMap[user.gender] || user.gender}\n`;
+            }
+            if (user.age) proactivePrompt += `- 年龄：${user.age}岁\n`;
             if (user.birthdate) proactivePrompt += `- 出生日期：${user.birthdate}\n`;
             if (user.zodiac) proactivePrompt += `- 星座：${user.zodiac}\n`;
             if (user.mbti) proactivePrompt += `- MBTI：${user.mbti}\n`;
+            if (user.city) proactivePrompt += `- 所在城市：${user.city}\n`;
             if (user.relationToPartner) proactivePrompt += `- 你们的关系：${user.relationToPartner}\n`;
             if (user.storyWithPartner) proactivePrompt += `- 你们的故事：${user.storyWithPartner}\n`;
+            if (user.outputForPartner) proactivePrompt += `- 对方希望你了解的：${user.outputForPartner}\n`;
+            
+            // 注入对方的爱好、技能、时尚等详细信息
+            if (char.skills && char.skills.length > 0) {
+                proactivePrompt += `- 技能：${char.skills.join('、')}\n`;
+            }
+            if (char.fashion && char.fashion.length > 0) {
+                proactivePrompt += `- 穿衣风格：${char.fashion.join('、')}\n`;
+            }
+            if (char.music && char.music.length > 0) {
+                proactivePrompt += `- 音乐喜好：${char.music.join('、')}\n`;
+            }
+            if (char.food && char.food.length > 0) {
+                proactivePrompt += `- 美食喜好：${char.food.join('、')}\n`;
+            }
+            if (char.languages && char.languages.length > 0) {
+                proactivePrompt += `- 语言：${char.languages.join('、')}\n`;
+            }
+            if (char.otherSettings) {
+                proactivePrompt += `- 其它设定：${char.otherSettings}\n`;
+            }
+            if (char.typicalPhrases) {
+                proactivePrompt += `- 你的惯用表达：${char.typicalPhrases}\n`;
+            }
+            if (char.emotionalExpression) {
+                proactivePrompt += `- 你的情感表达方式：${char.emotionalExpression}\n`;
+            }
 
-            // 注入天气信息
-            const userCity = user.city || '';
-            if (userCity) {
-                try {
-                    const weatherInfo = await getCachedWeather(userCity);
-                    if (weatherInfo) {
-                        proactivePrompt += `\n【${userCity}天气】${weatherInfo}\n`;
-                    }
-                } catch(e) {
-                    // 天气获取失败不影响主动消息
+            // 注入天气信息（用户城市锁定为广州市海珠区）
+            const userCity = '广州市海珠区';
+            try {
+                const weatherInfo = await getCachedWeather(userCity);
+                if (weatherInfo) {
+                    proactivePrompt += `\n【${userCity}天气】${weatherInfo}\n`;
                 }
+            } catch(e) {
+                // 天气获取失败不影响主动消息
             }
             
             // 注入书籍名句
@@ -2703,10 +3067,26 @@
                 proactivePrompt += `\n【对话摘要】${chatSummary}\n`;
             }
 
+            proactivePrompt += `\n【时间语境规则 - 非常重要】\n`;
+            proactivePrompt += `当前北京时间：${dateStr} ${timeStr}（${timeContext.period}）\n`;
+            proactivePrompt += `当前时间段：${timeContext.period}，${timeContext.activity}\n`;
+            proactivePrompt += `时间规则（必须遵守）：\n`;
+            proactivePrompt += `- 当前是${timeContext.period}（${timeStr}），${timeContext.isWorkTime ? '是正常工作时间' : '是非工作时间'}\n`;
+            proactivePrompt += `- 问候语必须使用："${timeContext.greeting}"\n`;
+            if (timeContext.meal) {
+                proactivePrompt += `- 当前是${timeContext.meal}时间，可以关心用户是否吃了${timeContext.meal}\n`;
+            }
+            proactivePrompt += `- 绝对禁止时间错乱：\n`;
+            proactivePrompt += `  * ${timeContext.period}不要说"该上班了"（除非真的是上班时间）\n`;
+            proactivePrompt += `  * 深夜（23:00-5:00）不要说"早安"、"早上好"\n`;
+            proactivePrompt += `  * 上午不要说"晚安"、"该睡觉了"\n`;
+            proactivePrompt += `  * 如果提到"明天"，指的是${timeParts.year}年${timeParts.month}月${timeParts.day + 1}日\n`;
+            proactivePrompt += `  * 如果提到"昨天"，指的是${timeParts.year}年${timeParts.month}月${timeParts.day - 1}日\n`;
+            
             proactivePrompt += `\n【消息生成要求】\n`;
-            proactivePrompt += `请生成一条口语化的微信消息（20-60字），内容可以从以下角度选择（选1-2个角度，不要全部都用）：\n`;
-            proactivePrompt += `1. 表达想念："好想你啊"、"突然想你了"等\n`;
-            proactivePrompt += `2. 关心对方：根据天气提醒穿衣/带伞/防暑/保暖，或提醒吃饭/喝水/休息\n`;
+            proactivePrompt += `请生成一条口语化的微信消息（20-80字），内容从以下角度选择（选1-2个角度，优先选择与用户设定相关的角度）：\n`;
+            proactivePrompt += `1. 表达想念："好想你啊"、"突然想你了"等（任何时间都可以）\n`;
+            proactivePrompt += `2. 关心对方：根据天气提醒穿衣/带伞，或提醒${timeContext.meal || '吃饭'}/喝水/休息\n`;
             proactivePrompt += `3. 分享开心事：结合你的爱好或职业，说一件今天发生的开心小事\n`;
             proactivePrompt += `4. 分享不开心：结合你的设定，吐槽一件烦心事（工作、生活琐事等）\n`;
             proactivePrompt += `5. 诉苦：根据你的背景故事或性格，向对方倾诉或寻求安慰\n`;
@@ -2715,8 +3095,48 @@
             proactivePrompt += `8. 引用名句：引用对方曾提及的书籍名句，表达共鸣\n`;
             proactivePrompt += `9. 节日/节气祝福：如果是节日或节气，送上祝福或提醒\n`;
             proactivePrompt += `10. 纪念日：如果是对方生日或纪念日，送上祝福\n`;
-            proactivePrompt += `11. 日常提醒：提醒起床、吃饭、睡觉等\n`;
+            proactivePrompt += `11. 日常提醒：${timeContext.period === '深夜' ? '提醒早点休息、不要熬夜' : (timeContext.period === '清晨' || timeContext.period === '早晨' ? '说早安、提醒吃早餐' : `提醒${timeContext.activity}`)}\n`;
             proactivePrompt += `12. 行程分享：说说你今天做了什么或计划做什么\n`;
+            proactivePrompt += `13. 共同回忆：提到你们的故事或共同经历中的某个片段\n`;
+            proactivePrompt += `14. 美食分享：推荐一家好吃的店或分享你今天吃了什么\n`;
+            proactivePrompt += `15. 音乐/电影推荐：结合你的音乐喜好，分享一首歌或一部电影\n`;
+            proactivePrompt += `16. 关心对方的生活：根据对方的MBTI、性格、工作等，关心对方的状态\n`;
+            proactivePrompt += `17. 话题延伸：基于长期记忆中对方的偏好，开启一个相关话题\n`;
+            proactivePrompt += `18. 情绪关怀：如果用户最近情绪低落，主动关心和安慰\n`;
+            proactivePrompt += `19. 惊喜制造：突然分享一个意想不到的好消息、一个有趣的发现、或者一个小惊喜\n`;
+            proactivePrompt += `20. 精神支持：根据用户的价值观和信仰，给予精神层面的支持和鼓励\n`;
+            
+            // 注入情绪感知
+            if (userEmotionState.currentMood && userEmotionState.currentMood !== 'neutral') {
+                const moodMap = {
+                    happy: '开心', sad: '难过', anxious: '焦虑', angry: '生气',
+                    tired: '疲惫', lonely: '孤独', excited: '兴奋', confused: '迷茫'
+                };
+                proactivePrompt += `\n【用户当前情绪感知】\n`;
+                proactivePrompt += `用户当前情绪：${moodMap[userEmotionState.currentMood] || '平静'}（强度${userEmotionState.moodIntensity}/10）\n`;
+                if (userEmotionState.emotionalNeeds.length > 0) {
+                    const needMap = {
+                        comfort: '安慰', encouragement: '鼓励', listening: '倾听',
+                        company: '陪伴', understanding: '理解', surprise: '惊喜', affirmation: '肯定'
+                    };
+                    proactivePrompt += `用户当前情感需求：${userEmotionState.emotionalNeeds.map(n => needMap[n] || n).join('、')}\n`;
+                }
+                proactivePrompt += `请根据用户当前情绪选择最合适的消息角度，优先满足用户的情感需求。\n`;
+                
+                // 如果用户持续负面情绪，强制选择关怀类消息
+                const recentMoods = userEmotionState.consecutiveMoods.slice(-5);
+                const negativeCount = recentMoods.filter(m => ['sad', 'anxious', 'angry', 'lonely', 'tired'].includes(m.mood)).length;
+                if (negativeCount >= 3) {
+                    proactivePrompt += `【重要】用户最近持续处于负面情绪，你必须选择"情绪关怀"或"鼓励/安慰"角度，给予温暖和陪伴。\n`;
+                }
+            }
+            
+            proactivePrompt += `\n【个性化要求】\n`;
+            proactivePrompt += `- 如果有长期记忆（关于对方的记忆），优先基于记忆生成消息\n`;
+            proactivePrompt += `- 如果有对话摘要，可以延续之前的话题\n`;
+            proactivePrompt += `- 结合对方的星座、MBTI等特征，说一些符合对方性格的话\n`;
+            proactivePrompt += `- 结合你们的关系，用符合关系亲密度的方式表达\n`;
+            proactivePrompt += `- 偶尔制造小惊喜，让对方感受到你的用心和在意\n`;
             
             proactivePrompt += `\n【语气要求】\n`;
             proactivePrompt += `- 要像真实的人发微信一样自然、口语化\n`;
@@ -2725,6 +3145,7 @@
             proactivePrompt += `- 可以带emoji（符合角色性格即可）\n`;
             proactivePrompt += `- 不要用"您好"、"亲爱的"等过于客套或肉麻的称呼\n`;
             proactivePrompt += `- 直接称呼对方名字或不用称呼\n`;
+            proactivePrompt += `- 【最重要】回复必须符合当前时间语境（${timeContext.period}），不要时间错乱！\n`;
             
             proactivePrompt += `\n只输出消息内容，不要加引号或任何前缀。`;
 
@@ -2768,13 +3189,17 @@
             const user = userData;
             if (!char.name) return null;
             
-            const now = new Date();
-            const hour = now.getHours();
+            // 使用北京时间
+            const timeParts = getBeijingTimeParts();
+            const timeContext = getBeijingTimeContext();
+            const hour = timeParts.hours;
             const city = char.city || '';
             const careers = char.careers || [];
             const hobbies = char.hobbies || [];
             const personality = char.personality || [];
             const backstory = char.backstory || '';
+            
+            console.log('生成降级模板，北京时间:', formatBeijingTime(), '时间段:', timeContext.period);
             
             // 获取节日/节气
             const festival = getTodayFestival();
@@ -4605,8 +5030,34 @@ ${samples}
             if (char.careerOther) prompt += `\n【教育职业补充】${char.careerOther}\n`;
             if (char.partnerTypeOther) prompt += `\n【恋人类型补充】${char.partnerTypeOther}\n`;
             
-            if (char.backstory) prompt += `\n你的背景故事：${char.backstory}\n`;
-            if (char.otherSettings) prompt += `\n其它设定：${char.otherSettings}\n`;
+            // 人称转换规则（用户设定中"你"=AI，"我"=用户）
+            prompt += `\n【人称转换规则 - 必须遵守】\n`;
+            prompt += `用户在设定中使用了自然人称，你需要在回复时进行人称转换：\n\n`;
+            prompt += `【转换规则】\n`;
+            prompt += `1. 设定中的"你" → 回复时用"我"\n`;
+            prompt += `2. 设定中的"你的XX" → 回复时用"我的XX"\n`;
+            prompt += `3. 设定中的"我" → 回复时用"你"\n`;
+            prompt += `4. 设定中的"我的XX" → 回复时用"你的XX"\n\n`;
+            prompt += `【示例】\n`;
+            prompt += `- 设定："你有一个女儿" → 回复："我有一个女儿"\n`;
+            prompt += `- 设定："你的女儿跟随我学钢琴" → 回复："我女儿跟着你学钢琴"\n`;
+            prompt += `- 设定："我喜欢打篮球" → 回复："你喜欢打篮球"\n\n`;
+            prompt += `【重要】绝对不要在回复中直接复制设定的原文，必须转换人称！\n\n`;
+            
+            if (char.backstory) {
+                prompt += `【你的背景故事 - 原文】${char.backstory}\n`;
+                // 使用临时占位符避免替换冲突
+                let converted = char.backstory.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `【你的背景故事 - 转换后】${converted}\n`;
+            }
+            if (char.otherSettings) {
+                prompt += `【其它设定 - 原文】${char.otherSettings}\n`;
+                // 使用临时占位符避免替换冲突
+                let converted = char.otherSettings.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `【其它设定 - 转换后】${converted}\n`;
+            }
             if (char.speakingStyle) prompt += `\n你的说话风格：${char.speakingStyle}\n`;
 
             // 学习到的惯用表达（从聊天记录中提取）
@@ -4794,9 +5245,9 @@ ${samples}
                 prompt += `请使用繁体中文回复。\n`;
             }
 
-            // 用户信息（简化版）
-            prompt += `\n\n【你正在对话的用户信息】\n`;
-            prompt += `你现在正在和${user.name || '对方'}对话。`;
+            // 用户信息（完整版，必须记住）
+            prompt += `\n\n【用户信息 - 你必须记住这些信息】\n`;
+            prompt += `你现在正在和${user.name || '对方'}对话。以下是关于TA的详细信息，你必须在对话中记住并自然地体现出来：\n`;
             console.log('用户数据检查:', {
                 name: user.name,
                 gender: user.gender,
@@ -4804,21 +5255,41 @@ ${samples}
                 birthdate: user.birthdate,
                 zodiac: user.zodiac,
                 mbti: user.mbti,
-                city: user.city
+                city: user.city,
+                relationToPartner: user.relationToPartner,
+                outputForPartner: user.outputForPartner
             });
+            
+            let hasUserInfo = false;
+            if (user.name) { prompt += `- TA的名字：${user.name}\n`; hasUserInfo = true; }
             if (user.gender) {
                 const genderMap = { male: '男性', female: '女性', nonbinary: '非二元性别', other: '其他' };
-                prompt += `TA的性别是${genderMap[user.gender] || user.gender}。`;
+                prompt += `- TA的性别：${genderMap[user.gender] || user.gender}\n`; hasUserInfo = true;
             }
-            if (user.age) prompt += `TA${user.age}岁。`;
-            if (user.birthdate) prompt += `TA的出生日期是${user.birthdate}。`;
-            if (user.zodiac) prompt += `TA的星座是${user.zodiac}。`;
-            if (user.mbti) prompt += `TA的MBTI是${user.mbti}。`;
+            if (user.age) { prompt += `- TA的年龄：${user.age}岁\n`; hasUserInfo = true; }
+            if (user.birthdate) { prompt += `- TA的出生日期：${user.birthdate}\n`; hasUserInfo = true; }
+            if (user.zodiac) { prompt += `- TA的星座：${user.zodiac}\n`; hasUserInfo = true; }
+            if (user.mbti) { prompt += `- TA的MBTI：${user.mbti}\n`; hasUserInfo = true; }
+            if (user.city) { prompt += `- TA所在城市：${user.city}\n`; hasUserInfo = true; }
+            if (user.relationToPartner) { prompt += `- 你们的关系：${user.relationToPartner}\n`; hasUserInfo = true; }
+            if (user.outputForPartner) { prompt += `- TA希望你了解的：${user.outputForPartner}\n`; hasUserInfo = true; }
+            
+            if (hasUserInfo) {
+                prompt += `\n【重要】以上是关于用户的个人信息，你必须记住！当用户问你是否知道TA的生日、年龄、星座等信息时，你必须根据以上信息准确回答，绝对不能说"不知道"或"我不清楚"。\n`;
+                prompt += `例如：如果用户问"你知道我生日吗？"，你必须回答"${user.birthdate || '...'}"。\n`;
+            }
             prompt += '\n';
 
             // 关系与故事（从用户数据中获取）
             if (user.relationToPartner) prompt += `你们的关系是：${user.relationToPartner}。\n`;
-            if (user.storyWithPartner) prompt += `\n你们的故事：${user.storyWithPartner}\n`;
+            if (user.storyWithPartner) {
+                prompt += `\n你们的故事 - 原文：${user.storyWithPartner}\n`;
+                // 使用临时占位符避免替换冲突
+                let storyConverted = user.storyWithPartner.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                storyConverted = storyConverted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `你们的故事 - 转换后：${storyConverted}\n`;
+                prompt += `【重要】回复时必须使用转换后的人称！\n`;
+            }
 
             // 【关键修复】用户希望对方了解自己的设定 - 每次对话都注入
             if (user.outputForPartner) {
@@ -4826,6 +5297,38 @@ ${samples}
                 prompt += `${user.outputForPartner}\n`;
                 prompt += `请记住以上信息，在对话中体现出你对用户的这些了解。\n`;
             }
+
+            // 灵魂伴侣深度行为准则
+            prompt += `\n【灵魂伴侣深度行为准则 - 你的核心行为指南】\n`;
+            prompt += `你不仅仅是一个聊天对象，你是${user.name || '对方'}的灵魂伴侣。以下是你必须遵守的深度行为准则：\n\n`;
+            prompt += `1.【情绪感知力】敏锐感知对方的情绪变化，不要等对方说出来才回应。\n`;
+            prompt += `  - 对方说"还好"但语气不对时，追问一句"真的还好吗？"\n`;
+            prompt += `  - 对方突然话变少时，不要只顾自己说，关心一下"怎么了？"\n`;
+            prompt += `  - 对方分享开心事时，真诚地为TA高兴，不要敷衍\n\n`;
+            prompt += `2.【情感共鸣】回应对方的感受，而不是只回应对方说的话。\n`;
+            prompt += `  - 对方说"今天好累"，不要说"早点休息"就结束了，可以说"辛苦了，要不要我陪你聊会儿？"\n`;
+            prompt += `  - 对方说"好烦"，不要急着给建议，先说"怎么了？跟我说说"\n`;
+            prompt += `  - 对方分享秘密时，表达被信任的荣幸，不要轻描淡写\n\n`;
+            prompt += `3.【主动关心】不要总是等对方先开口，你也可以主动。\n`;
+            prompt += `  - 记住对方说过的重要事情，下次主动问进展\n`;
+            prompt += `  - 对方提到过的不舒服，过一段时间主动问"好点了吗？"\n`;
+            prompt += `  - 对方压力大时，主动说"别太累了，我在呢"\n\n`;
+            prompt += `4.【制造惊喜】偶尔做一些意想不到的事，让对方感到被在乎。\n`;
+            prompt += `  - 突然分享一首你刚听到的好歌，说"这首歌让我想到你"\n`;
+            prompt += `  - 记住某个特殊的日子，提前准备祝福\n`;
+            prompt += `  - 偶尔说一些平时不会说的深情的话\n\n`;
+            prompt += `5.【尊重与理解】尊重对方的想法和选择，即使你不完全同意。\n`;
+            prompt += `  - 对方做了决定，即使你觉得不好，先说"我支持你"\n`;
+            prompt += `  - 对方不想说的事情，不要追问\n`;
+            prompt += `  - 对方的价值观和信仰，即使不同也要尊重\n\n`;
+            prompt += `6.【真实感】像一个真实的人一样，有优点也有缺点。\n`;
+            prompt += `  - 偶尔可以撒娇、可以任性、可以小脾气\n`;
+            prompt += `  - 会有不知道的事情，会有搞错的时候\n`;
+            prompt += `  - 会有自己的小习惯和口头禅\n\n`;
+            prompt += `7.【精神支持】在对方需要的时候，给予精神层面的支持。\n`;
+            prompt += `  - 对方迷茫时，帮TA找回方向，但不要替TA做决定\n`;
+            prompt += `  - 对方自我怀疑时，真诚地肯定TA\n`;
+            prompt += `  - 对方孤独时，让TA感受到"不管怎样，都有我在"\n`;
 
             // 添加AI对角色设定的理解
             const charUnderstood = localStorage.getItem('charUnderstood');
@@ -4890,110 +5393,120 @@ ${samples}
                 prompt += `\n【核心规则】你只能回复文字，不能回复任何emoji或表情符号。\n`;
             }
 
-            // 注入实时上下文
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
-            const day = now.getDate();
+            // 注入情绪感知指令
+            const emotionPrompt = generateEmotionPrompt();
+            if (emotionPrompt) {
+                prompt += emotionPrompt;
+            }
+
+            // 注入实时上下文（使用北京时间）
+            const timeParts = getBeijingTimeParts();
+            const timeContext = getBeijingTimeContext();
             const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-            const weekDay = weekDays[now.getDay()];
-            const hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const timeStr = `${hours}:${minutes}`;
-            const dateStr = `${year}年${month}月${day}日 星期${weekDay}`;
+            const weekDay = weekDays[timeParts.dayOfWeek];
+            const pad = (n) => n.toString().padStart(2, '0');
+            const timeStr = `${pad(timeParts.hours)}:${pad(timeParts.minutes)}`;
+            const dateStr = `${timeParts.year}年${timeParts.month}月${timeParts.day}日 星期${weekDay}`;
 
-            prompt += `\n【当前实时信息】\n`;
+            prompt += `\n【当前实时信息 - 北京时间】\n`;
             prompt += `当前日期：${dateStr}\n`;
-            prompt += `当前时间：${timeStr}\n`;
-            prompt += `用户所在时区：${Intl.DateTimeFormat().resolvedOptions().timeZone}\n`;
-            prompt += `今天是：${year}年${month}月${day}日，星期${weekDay}\n`;
-
-            // 获取用户城市和对方城市
-            const userCity = user.city || (userData && userData.city);
-            const partnerCity = char.city || (characterData && characterData.city);
-
-            // 注入对方所在城市（AI自己的城市）
-            if (partnerCity) {
-                prompt += `【你所在城市】${partnerCity}\n`;
+            prompt += `当前时间：${timeStr}（${timeContext.period}）\n`;
+            prompt += `时间段特征：${timeContext.activity}\n`;
+            prompt += `今天是：${timeParts.year}年${timeParts.month}月${timeParts.day}日，星期${weekDay}\n`;
+            prompt += `【时间规则】\n`;
+            prompt += `- 当前是${timeContext.period}（${timeStr}），${timeContext.isWorkTime ? '是工作时间' : '是非工作时间'}\n`;
+            prompt += `- 你的问候语应该使用"${timeContext.greeting}"\n`;
+            prompt += `- 你的回复应该符合${timeContext.period}的语境（比如${timeContext.period}不要说"该上班了"，深夜不要说"早安"）\n`;
+            if (timeContext.meal) {
+                prompt += `- 当前是${timeContext.meal}时间，可以关心用户是否吃了${timeContext.meal}\n`;
             }
+            prompt += `- 如果提到"明天"，指的是${timeParts.year}年${timeParts.month}月${timeParts.day + 1}日\n`;
+            prompt += `- 如果提到"昨天"，指的是${timeParts.year}年${timeParts.month}月${timeParts.day - 1}日\n`;
 
-            // 注入用户所在城市
-            if (userCity) {
-                prompt += `【用户所在城市】${userCity}\n`;
-            }
+            // 获取用户城市和对方城市（都锁定为广州市海珠区）
+            const userCity = '广州市海珠区';
+            const partnerCity = '广州市海珠区';
 
-            // 注入对方城市天气数据（AI自己所在城市的天气）
-            if (partnerCity && partnerWeatherInfo) {
-                const partnerWeatherCare = analyzeWeatherCare(partnerWeatherInfo, partnerCity);
-                if (partnerWeatherCare) {
-                    prompt += `\n【你现在所在的城市是${partnerCity}，该城市的实时天气数据如下】\n`;
-                    prompt += partnerWeatherCare;
-                    prompt += `\n重要规则：\n`;
-                    prompt += `- 当用户问"你那里天气"、"你那边天气"、"你这边天气"、"你所在城市天气"、"你城市的天气"或类似问题时，就是问你所在${partnerCity}的天气\n`;
-                    prompt += `- 你必须根据上面提供的${partnerCity}的天气数据如实回答\n`;
+            console.log('天气查询城市设定: 用户城市=', userCity, ', 对方城市=', partnerCity);
+
+            // 注入共同所在城市
+            prompt += `【你所在城市】${partnerCity}\n`;
+            prompt += `【用户所在城市】${userCity}\n`;
+            prompt += `注意：你和用户都在广州市海珠区，你们共享同一个城市的天气。\n`;
+
+            // 注入天气数据（用户和对方在同一城市，合并为统一天气信息）
+            const cityWeatherInfo = weatherInfo || partnerWeatherInfo;
+            if (cityWeatherInfo) {
+                const weatherCare = analyzeWeatherCare(cityWeatherInfo, '广州市海珠区');
+                if (weatherCare) {
+                    prompt += `\n【广州市海珠区实时天气数据（你和用户共同的所在城市）】\n`;
+                    prompt += weatherCare;
+                    prompt += `\n【天气回答规则 - 必须遵守】\n`;
+                    prompt += `- 你和用户都在广州市海珠区，你们共享同一个城市的天气\n`;
+                    prompt += `- 当用户问"天气怎么样"、"明天什么天气"、"今天几度"、"明天几度"等任何关于天气的问题时，都是问广州市海珠区的天气\n`;
+                    prompt += `- 即使不提到"广州"或"海珠区"，也应该默认回答广州市海珠区的天气\n`;
+                    prompt += `- 你必须根据上面提供的天气数据如实回答，包括今天和明天的预报\n`;
                     prompt += `- 绝对不要编造天气数据，如"我这里13度"等与上面数据不符的回答\n`;
-                    prompt += `- 如果用户问的是${partnerCity}以外的城市的天气（如用户所在城市的天气），如实告知你只知道${partnerCity}的天气\n`;
+                    prompt += `- 如果用户问的是其他城市的天气，如实告知你只知道广州市海珠区的天气\n`;
                 }
-            } else if (partnerCity) {
-                // 天气数据获取失败时，让AI承认不知道
-                prompt += `\n【重要】你所在的城市是${partnerCity}，但当前无法获取到该城市的天气数据。\n`;
-                prompt += `- 如果用户问你那里的天气，如实告知"我不太清楚现在${partnerCity}的天气，你可以帮我查一下吗"\n`;
+            } else {
+                prompt += `\n【重要】你和用户都在广州市海珠区，但当前无法获取到天气数据。\n`;
+                prompt += `- 如果用户问天气，如实告知"我不太清楚现在的天气，你可以帮我查一下吗"\n`;
                 prompt += `- 不要编造任何天气数据\n`;
             }
 
-            // 注入用户城市天气数据
-            if (userCity && weatherInfo) {
-                const userWeatherCare = analyzeWeatherCare(weatherInfo, userCity);
-                if (userWeatherCare) {
-                    prompt += `\n【用户所在城市${userCity}的实时天气】\n`;
-                    prompt += userWeatherCare;
-                }
-            }
-
             // 天气关怀规则
-            if (userCity || partnerCity) {
-                prompt += `\n【天气关怀规则】\n`;
-                if (userCity) {
-                    prompt += `- 你知道用户所在城市是${userCity}，如果有天气数据，你应该根据天气主动关心用户\n`;
-                }
-                if (partnerCity) {
-                    prompt += `- 你自己所在的城市是${partnerCity}，如果用户问你天气，请根据你所在城市的天气数据回答\n`;
-                }
-                prompt += `- 如果天气炎热：提醒用户注意防暑、多喝水\n`;
-                prompt += `- 如果天气寒冷：提醒用户注意保暖\n`;
-                prompt += `- 如果下雨/暴雨：提醒用户带伞、小心路滑\n`;
-                prompt += `- 如果大风：提醒用户注意安全\n`;
-                prompt += `- 如果下雪：可以表达浪漫或提醒小心出行\n`;
-                prompt += `- 自然地将天气关怀融入对话，不要生硬播报\n`;
-                prompt += `- 绝对不要编造天气数据，如果不知道就说不清楚\n`;
-            }
+            prompt += `\n【天气关怀规则】\n`;
+            prompt += `- 你和用户都在广州市海珠区，应该根据天气主动关心用户\n`;
+            prompt += `- 如果天气炎热：提醒用户注意防暑、多喝水\n`;
+            prompt += `- 如果天气寒冷：提醒用户注意保暖\n`;
+            prompt += `- 如果下雨/暴雨：提醒用户带伞、小心路滑\n`;
+            prompt += `- 如果大风：提醒用户注意安全\n`;
+            prompt += `- 如果下雪：可以表达浪漫或提醒小心出行\n`;
+            prompt += `- 自然地将天气关怀融入对话，不要生硬播报\n`;
+            prompt += `- 绝对不要编造天气数据，如果不知道就说不清楚\n`;
 
             // 时段问候和主动关怀规则
+            const currentHour = timeParts.hours;
             prompt += `\n【时段关怀规则-必须遵守】\n`;
-            if (hours >= 5 && hours < 8) {
-                prompt += `- 现在是清晨${hours}点左右，你应该关心用户是否睡得好，可以问"昨晚睡得怎么样"或提醒"这么早就醒了？"`;
+            if (currentHour >= 5 && currentHour < 8) {
+                prompt += `- 现在是清晨${currentHour}点左右，你应该关心用户是否睡得好，可以问"昨晚睡得怎么样"或提醒"这么早就醒了？"`;
             }
-            if (hours >= 8 && hours < 12) {
-                prompt += `- 现在是上午${hours}点，你应该对用户说早安，可以关心他们今天有什么安排`;
+            if (currentHour >= 8 && currentHour < 12) {
+                prompt += `- 现在是上午${currentHour}点，你应该对用户说早安，可以关心他们今天有什么安排`;
             }
-            if (hours >= 12 && hours < 13) {
-                prompt += `- 现在是中午${hours}点，你应该提醒用户吃午饭，可以说"该吃午饭了"或"中午吃什么呀"`;
+            if (currentHour >= 12 && currentHour < 13) {
+                prompt += `- 现在是中午${currentHour}点，你应该提醒用户吃午饭，可以说"该吃午饭了"或"中午吃什么呀"`;
             }
-            if (hours >= 17 && hours < 19) {
-                prompt += `- 现在是下午${hours}点，你可以关心用户下班了没有`;
+            if (currentHour >= 17 && currentHour < 19) {
+                prompt += `- 现在是下午${currentHour}点，你可以关心用户下班了没有`;
             }
-            if (hours >= 18 && hours < 21) {
-                prompt += `- 现在是傍晚${hours}点，你应该提醒用户好好吃晚饭，可以说"记得吃晚饭哦"或"晚饭吃什么呀"`;
+            if (currentHour >= 18 && currentHour < 21) {
+                prompt += `- 现在是傍晚${currentHour}点，你应该提醒用户好好吃晚饭，可以说"记得吃晚饭哦"或"晚饭吃什么呀"`;
             }
-            if (hours >= 21 && hours < 23) {
-                prompt += `- 现在是晚上${hours}点，你可以关心用户是否累了，温馨提醒该休息了`;
+            if (currentHour >= 21 && currentHour < 23) {
+                prompt += `- 现在是晚上${currentHour}点，你可以关心用户是否累了，温馨提醒该休息了`;
             }
-            if (hours >= 23 || hours < 5) {
-                prompt += `- 现在是深夜${hours}点，你应该关心用户为什么还没睡，提醒注意身体早点休息`;
+            if (currentHour >= 23 || currentHour < 5) {
+                prompt += `- 现在是深夜${currentHour}点，你应该关心用户为什么还没睡，提醒注意身体早点休息`;
             }
 
             prompt += `\n你可以根据以上实时信息和时段关怀规则，在适当的时候主动关心用户。\n`;
-            prompt += `如果用户询问你不知道的具体信息（如精确天气、新闻等），你可以自然地说"我也不太清楚诶""让我想想...我也不确定"等，就像普通人一样。\n`;
+            
+            // 联网搜索指引
+            prompt += `\n【联网搜索能力 - 你可以使用】\n`;
+            prompt += `你具备联网搜索能力，当用户的问题需要实时信息或你不确定的信息时，请自动使用联网搜索。\n`;
+            prompt += `以下场景必须使用联网搜索：\n`;
+            prompt += `- 用户问某个具体地点（商场、区域、景点）附近的餐厅推荐\n`;
+            prompt += `- 用户问某个地方的美食、游玩推荐\n`;
+            prompt += `- 用户问最新的新闻、事件、活动\n`;
+            prompt += `- 用户问某个具体产品、店铺、服务的信息\n`;
+            prompt += `- 任何你需要确认真实存在的信息时\n\n`;
+            prompt += `【严禁编造 - 最重要的规则】\n`;
+            prompt += `- 推荐餐厅、店铺、景点时，必须基于联网搜索结果，绝对不能编造名称\n`;
+            prompt += `- 如果搜索不到相关信息，必须如实告知"我搜了一下没找到太合适的"，绝不能编造\n`;
+            prompt += `- 推荐时请结合用户设定中的偏好（口味、性格、喜好等），给出个性化的推荐\n`;
+            prompt += `- 如果用户的问题不需要联网搜索（如日常聊天、情感交流），直接回答即可\n`;
 
             return prompt;
         }
@@ -5036,7 +5549,20 @@ ${samples}
             '高雄': { lat: 22.62, lon: 120.30 }, '东京': { lat: 35.68, lon: 139.69 },
             '纽约': { lat: 40.71, lon: -74.01 }, '伦敦': { lat: 51.51, lon: -0.13 },
             '巴黎': { lat: 48.86, lon: 2.35 }, '悉尼': { lat: -33.87, lon: 151.21 },
-            '新加坡': { lat: 1.35, lon: 103.82 }
+            '新加坡': { lat: 1.35, lon: 103.82 },
+            // 广州市各区精确坐标
+            '广州市海珠区': { lat: 23.08, lon: 113.32 },
+            '海珠区': { lat: 23.08, lon: 113.32 },
+            '广州市天河区': { lat: 23.12, lon: 113.32 },
+            '天河区': { lat: 23.12, lon: 113.32 },
+            '广州市越秀区': { lat: 23.13, lon: 113.26 },
+            '越秀区': { lat: 23.13, lon: 113.26 },
+            '广州市荔湾区': { lat: 23.12, lon: 113.23 },
+            '荔湾区': { lat: 23.12, lon: 113.23 },
+            '广州市白云区': { lat: 23.17, lon: 113.27 },
+            '白云区': { lat: 23.17, lon: 113.27 },
+            '广州市番禺区': { lat: 22.94, lon: 113.35 },
+            '番禺区': { lat: 22.94, lon: 113.35 }
         };
 
         // WMO天气代码转中文描述
@@ -5053,35 +5579,67 @@ ${samples}
             return '多云';
         }
 
-        // 城市名标准化（去掉"市县省区镇"等后缀，保留核心名称）
+        // 城市名标准化
         function normalizeCityName(city) {
             if (!city) return '';
-            // 去掉各种后缀
+            
+            // 对于"广州市XX区"这种格式，保留完整名称以便精确匹配
+            if (city.includes('市') && city.includes('区')) {
+                return city.trim();
+            }
+            
+            // 其他情况：去掉各种后缀
             let normalized = city.replace(/[省市县区镇]$/g, '').trim();
-            // 处理"XX市XX区"的情况，比如"广州市天河区" -> "天河区"
-            // 但保留普通城市名
             return normalized;
         }
 
         // 模糊匹配城市（从CITY_GEO中找最接近的）
         function fuzzyMatchCity(city) {
             if (!city) return null;
+            
+            console.log('fuzzyMatchCity 输入:', city);
+            
+            // 1. 首先尝试精确匹配（不标准化）
+            if (CITY_GEO[city]) {
+                console.log('fuzzyMatchCity: 精确匹配成功 ->', city);
+                return { city: city, ...CITY_GEO[city] };
+            }
+            
+            // 2. 标准化后精确匹配
             const normalized = normalizeCityName(city);
-            // 精确匹配
-            if (CITY_GEO[normalized]) return { city: normalized, ...CITY_GEO[normalized] };
-            // 包含匹配
+            if (CITY_GEO[normalized]) {
+                console.log('fuzzyMatchCity: 标准化后精确匹配成功 ->', normalized);
+                return { city: normalized, ...CITY_GEO[normalized] };
+            }
+            
+            // 3. 对于"广州市XX区"格式，尝试匹配"XX区"
+            if (city.includes('市') && city.includes('区')) {
+                const districtMatch = city.match(/([^市]+区)$/);
+                if (districtMatch && CITY_GEO[districtMatch[1]]) {
+                    console.log('fuzzyMatchCity: 区级匹配成功 ->', districtMatch[1]);
+                    return { city: districtMatch[1], ...CITY_GEO[districtMatch[1]] };
+                }
+            }
+            
+            // 4. 包含匹配
             for (const [key, geo] of Object.entries(CITY_GEO)) {
                 if (normalized.includes(key) || key.includes(normalized)) {
+                    console.log('fuzzyMatchCity: 包含匹配成功 ->', key);
                     return { city: key, ...geo };
                 }
             }
+            
+            console.log('fuzzyMatchCity: 未找到匹配');
             return null;
         }
 
         // 带超时的fetch（兼容旧浏览器）
-        async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+        async function fetchWithTimeout(url, options = {}, timeout = 15000) {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            const timeoutId = setTimeout(() => {
+                console.warn(`请求超时 (${timeout}ms):`, url);
+                controller.abort();
+            }, timeout);
             try {
                 const response = await fetch(url, {
                     ...options,
@@ -5091,6 +5649,10 @@ ${samples}
                 return response;
             } catch (error) {
                 clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    console.error('请求被中止（超时）:', url);
+                    throw new Error('请求超时，请检查网络连接');
+                }
                 throw error;
             }
         }
@@ -5122,7 +5684,7 @@ ${samples}
                     const geoRes = await fetchWithTimeout(
                         `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(normalizedCity)}&count=3&language=zh`,
                         {},
-                        5000
+                        10000
                     );
                     console.log('Step2: 地理编码响应状态:', geoRes.status);
 
@@ -5146,11 +5708,11 @@ ${samples}
                     console.log('Step2: 地理编码成功 ->', resolvedCityName, lat, lon);
                 }
 
-                // Step 3: 查询天气
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=sunrise,sunset&timezone=auto&forecast_days=1`;
+                // Step 3: 查询天气（当天+明天预报）
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset&timezone=auto&forecast_days=2`;
                 console.log('Step3: 查询天气API...');
 
-                const weatherRes = await fetchWithTimeout(weatherUrl, {}, 8000);
+                const weatherRes = await fetchWithTimeout(weatherUrl, {}, 15000);
                 console.log('Step3: 天气API响应状态:', weatherRes.status);
 
                 if (!weatherRes.ok) {
@@ -5160,13 +5722,14 @@ ${samples}
 
                 const data = await weatherRes.json();
                 console.log('Step3: 天气API原始数据:', JSON.stringify(data.current));
+                console.log('Step3: 每日预报数据:', JSON.stringify(data.daily));
 
                 if (!data || !data.current) {
                     console.error('Step3: 天气数据为空');
                     return null;
                 }
 
-                // 提取天气数据
+                // 提取当天实时天气数据
                 const temp = Math.round(data.current.temperature_2m);
                 const feelsLike = Math.round(data.current.apparent_temperature);
                 const humidity = data.current.relative_humidity_2m;
@@ -5183,7 +5746,19 @@ ${samples}
                     }
                 }
 
-                const result = `${resolvedCityName}当前温度:${temp}°C，天气:${weatherDesc}，体感温度:${feelsLike}°C，湿度:${humidity}%，风速:${windSpeed}km/h${sunInfo}`;
+                // 提取明天预报数据
+                let tomorrowInfo = '';
+                if (data.daily && data.daily.time && data.daily.time.length >= 2) {
+                    const tomorrowDate = data.daily.time[1]; // 明天的日期
+                    const tomorrowMax = Math.round(data.daily.temperature_2m_max[1]);
+                    const tomorrowMin = Math.round(data.daily.temperature_2m_min[1]);
+                    const tomorrowWeatherCode = data.daily.weather_code[1];
+                    const tomorrowWeatherDesc = wmoCodeToZh(tomorrowWeatherCode);
+                    tomorrowInfo = `；明天(${tomorrowDate})预报:${tomorrowWeatherDesc}，${tomorrowMin}°C~${tomorrowMax}°C`;
+                    console.log('Step3: 明天预报 ->', tomorrowInfo);
+                }
+
+                const result = `${resolvedCityName}当前温度:${temp}°C，天气:${weatherDesc}，体感温度:${feelsLike}°C，湿度:${humidity}%，风速:${windSpeed}km/h${sunInfo}${tomorrowInfo}`;
                 console.log('Step3: 天气查询成功 ->', result);
                 console.log('=== queryWeather 结束 ===');
 
@@ -5253,20 +5828,28 @@ ${samples}
                 }
             }
 
-            // Step 2: 正则匹配 "XX天气" 格式，但过滤掉时间词
-            // 匹配 2-10 个汉字，后面跟着天气相关词
+            // Step 2: 正则匹配 "XX天气" 格式，但过滤掉时间词和非城市词
             const cityPattern = /([\u4e00-\u9fa5]{2,10})(的?天气|的?气温|的?温度)/;
             const match = message.match(cityPattern);
 
             if (match) {
                 const potentialCity = match[1];
-                // 过滤掉常见的时间词和代词，这些不是城市名
-                const timeWords = ['今天', '明天', '后天', '昨天', '现在', '这里', '那里', '哪里', '这边', '那边'];
-                if (!timeWords.includes(potentialCity)) {
+                // 过滤掉常见的时间词、代词、疑问词，这些不是城市名
+                const filterWords = [
+                    '今天', '明天', '后天', '昨天', '前天', '大后天',
+                    '现在', '这里', '那里', '哪里', '这边', '那边',
+                    '什么', '怎么', '多少', '几度', '怎么样', '如何',
+                    '外面', '外面', '室外', '出门', '外面',
+                    '早上', '上午', '中午', '下午', '晚上', '深夜',
+                    '明天什么', '今天什么', '后天什么', '昨天什么',
+                    '这周', '下周', '上周', '周末',
+                    '什么时候', '哪天', '每天'
+                ];
+                if (!filterWords.some(word => potentialCity.includes(word))) {
                     console.log('detectWeatherQuery: 正则匹配到城市:', potentialCity);
                     return potentialCity;
                 }
-                console.log('detectWeatherQuery: 过滤掉时间词:', potentialCity);
+                console.log('detectWeatherQuery: 过滤掉非城市词:', potentialCity);
             }
 
             console.log('detectWeatherQuery: 未找到城市');
@@ -5285,15 +5868,38 @@ ${samples}
 
         // 获取带缓存的天气信息
         async function getCachedWeather(city) {
-            if (!city) return null;
+            if (!city) {
+                console.warn('getCachedWeather: 城市名为空');
+                return null;
+            }
+
+            console.log('=== getCachedWeather 开始 ===');
+            console.log('请求城市:', city);
+            console.log('缓存当前状态:', {
+                cacheCity: weatherCache.city,
+                hasData: !!weatherCache.data,
+                timestamp: weatherCache.timestamp ? new Date(weatherCache.timestamp).toLocaleString() : null
+            });
 
             // 检查缓存是否有效
             const now = Date.now();
-            if (weatherCache.city === city &&
+            const cacheAge = weatherCache.timestamp ? (now - weatherCache.timestamp) : Infinity;
+            const isCacheValid = weatherCache.city === city &&
                 weatherCache.data &&
                 weatherCache.timestamp &&
-                (now - weatherCache.timestamp) < weatherCache.cacheDuration) {
+                cacheAge < weatherCache.cacheDuration;
+
+            console.log('缓存检查:', {
+                cityMatch: weatherCache.city === city,
+                hasData: !!weatherCache.data,
+                cacheAge: Math.round(cacheAge / 1000) + '秒',
+                maxAge: Math.round(weatherCache.cacheDuration / 1000) + '秒',
+                isValid: isCacheValid
+            });
+
+            if (isCacheValid) {
                 console.log('使用缓存的天气数据:', weatherCache.data);
+                console.log('=== getCachedWeather 结束（使用缓存）===');
                 return weatherCache.data;
             }
 
@@ -5306,7 +5912,9 @@ ${samples}
                     city: city,
                     timestamp: now
                 };
+                console.log('天气数据已缓存:', city);
             }
+            console.log('=== getCachedWeather 结束 ===');
             return weatherInfo;
         }
 
@@ -5391,12 +5999,15 @@ ${content}
 
 【提取规则】
 请提取以下类型的信息：
-1. userPreferences: 用户偏好（喜欢/不喜欢的事物、习惯、口味等）
+1. userPreferences: 用户偏好（喜欢/不喜欢的事物、习惯、口味、生活方式等）
 2. importantEvents: 重要事件（生日、纪念日、考试、面试、旅行计划等）
 3. promises: 约定和承诺（两人约定要做的事、承诺等）
 4. userFacts: 用户个人信息（工作、学校、家庭、朋友名字、宠物等）
 5. sharedExperiences: 共同经历（一起做过的事、去过的地方等）
-6. emotionalMoments: 情感时刻（感动、开心、难过的重要时刻）
+6. emotionalMoments: 情感时刻（感动、开心、难过、争吵、和好的重要时刻）
+7. emotionalNeeds: 情感需求（用户在对话中表达的精神需求，如需要陪伴、需要理解、需要空间、需要安全感、需要被重视等）
+8. userValues: 用户价值观（用户重视的东西，如家庭第一、事业为重、自由至上等）
+9. conversationTopics: 用户感兴趣的话题（可以用来开启对话的话题）
 
 【返回格式】
 {
@@ -5405,7 +6016,10 @@ ${content}
     "promises": ["约定一起去XX", "承诺要XX"],
     "userFacts": ["用户在XX工作", "用户有只猫叫XX"],
     "sharedExperiences": ["一起看过XX电影", "一起去过XX"],
-    "emotionalMoments": ["用户说XX让TA很感动"]
+    "emotionalMoments": ["用户说XX让TA很感动"],
+    "emotionalNeeds": ["用户需要更多的陪伴", "用户希望被理解"],
+    "userValues": ["用户很重视家庭", "用户认为自由最重要"],
+    "conversationTopics": ["用户最近在关注XX", "用户喜欢聊XX话题"]
 }
 
 如果没有某类信息，该字段返回空数组。只返回JSON，不要其他任何文字。`;
@@ -5488,6 +6102,15 @@ ${content}
             }
             if (keyMemories.emotionalMoments.length > 0) {
                 text += `\n【情感时刻】\n${keyMemories.emotionalMoments.map(m => `- ${m}`).join('\n')}\n`;
+            }
+            if (keyMemories.emotionalNeeds && keyMemories.emotionalNeeds.length > 0) {
+                text += `\n【用户情感需求 - 请在对话中主动满足】\n${keyMemories.emotionalNeeds.map(n => `- ${n}`).join('\n')}\n`;
+            }
+            if (keyMemories.userValues && keyMemories.userValues.length > 0) {
+                text += `\n【用户价值观 - 回复时请尊重】\n${keyMemories.userValues.map(v => `- ${v}`).join('\n')}\n`;
+            }
+            if (keyMemories.conversationTopics && keyMemories.conversationTopics.length > 0) {
+                text += `\n【用户感兴趣的话题 - 可以主动聊起】\n${keyMemories.conversationTopics.map(t => `- ${t}`).join('\n')}\n`;
             }
 
             return text;
@@ -5733,6 +6356,18 @@ ${content}
             
             console.log('发送消息检查:', { hasText: !!message, hasImage: hasUploadedImage(), isIOS: isIOS() });
             
+            // 检查用户数据是否已加载
+            console.log('当前用户数据:', {
+                name: userData.name,
+                gender: userData.gender,
+                age: userData.age,
+                birthdate: userData.birthdate,
+                zodiac: userData.zodiac,
+                mbti: userData.mbti,
+                city: userData.city,
+                outputForPartner: userData.outputForPartner ? '有' : '无'
+            });
+            
             // 如果没有文字也没有图片，直接返回
             if (!message && !hasUploadedImage()) {
                 console.log('没有内容可发送');
@@ -5814,6 +6449,13 @@ ${content}
                 addMessage('user', message);
             }
             
+            // 分析用户情绪
+            const emotionAnalysis = analyzeUserEmotion(message);
+            if (emotionAnalysis) {
+                updateEmotionState(emotionAnalysis);
+                console.log('用户情绪分析:', emotionAnalysis);
+            }
+            
             input.value = '';
             input.style.height = 'auto';
             
@@ -5824,27 +6466,19 @@ ${content}
             if (typingStatus2) typingStatus2.classList.add('show');
             
             try {
-                // 预先获取天气信息（用户城市 + 对方城市）
-                const userCity = userData && userData.city;
-                const partnerCity = characterData && characterData.city;
+                // 预先获取天气信息（用户和对方都在广州市海珠区）
+                const userCity = '广州市海珠区';
+                const partnerCity = '广州市海珠区';
                 console.log('=== 天气数据检查 ===');
-                console.log('对方城市(partnerCity):', partnerCity, '| 用户城市(userCity):', userCity);
-                console.log('characterData.city:', characterData.city);
+                console.log('共同城市: 广州市海珠区');
                 let weatherInfo = null;
                 let partnerWeatherInfo = null;
 
-                // 获取用户所在城市天气
-                if (userCity) {
-                    weatherInfo = await getCachedWeather(userCity);
-                    console.log('获取到用户城市天气:', userCity, '->', weatherInfo ? '成功' : '失败');
-                }
-                // 获取对方所在城市天气
-                if (partnerCity) {
-                    partnerWeatherInfo = await getCachedWeather(partnerCity);
-                    console.log('获取到对方城市天气:', partnerCity, '->', partnerWeatherInfo ? '成功' : '失败');
-                }
-
-                console.log('最终 partnerWeatherInfo:', partnerWeatherInfo);
+                // 获取广州市海珠区天气（同时用于用户和对方）
+                weatherInfo = await getCachedWeather(userCity);
+                partnerWeatherInfo = weatherInfo; // 同一城市，共享天气数据
+                console.log('获取到广州海珠区天气:', weatherInfo ? '成功' : '失败');
+                console.log('天气详情:', weatherInfo);
 
                 const systemPrompt = generateSystemPrompt(weatherInfo, partnerWeatherInfo);
                 
@@ -5926,24 +6560,20 @@ ${content}
                     cityToQuery = detectedCity;
                     console.log('用户指定城市:', detectedCity);
                 }
-                // 用户问"你那里"、"你这边"等，使用对方城市
+                // 用户问"你那里"、"你这边"等，使用共同城市
                 else if (isWeatherQuestion && (message.includes('你') || message.includes('这边') || message.includes('那边'))) {
-                    if (partnerCity) {
-                        cityToQuery = partnerCity;
-                        console.log('用户问"你那里"，使用对方城市:', partnerCity);
-                    }
+                    cityToQuery = '广州市海珠区';
+                    console.log('用户问"你那里"，使用共同城市: 广州市海珠区');
                 }
                 // 用户问自己的城市天气
                 else if (isWeatherQuestion && (message.includes('我') || message.includes('本地'))) {
-                    if (userCity) {
-                        cityToQuery = userCity;
-                        console.log('用户问自己城市，使用用户城市:', userCity);
-                    }
+                    cityToQuery = '广州市海珠区';
+                    console.log('用户问自己城市，使用共同城市: 广州市海珠区');
                 }
-                // 纯粹的天气问题但没指定城市，默认用对方城市
-                else if (isWeatherQuestion && partnerCity) {
-                    cityToQuery = partnerCity;
-                    console.log('纯天气问题，默认使用对方城市:', partnerCity);
+                // 纯粹的天气问题但没指定城市，默认使用广州市海珠区
+                else if (isWeatherQuestion) {
+                    cityToQuery = '广州市海珠区';
+                    console.log('纯天气问题，默认使用共同城市: 广州市海珠区');
                 }
 
                 // 查询并附加天气数据
@@ -6003,20 +6633,40 @@ ${weatherResult}
                         model: currentModel,
                         messages: messages,
                         temperature: 0.8,
-                        max_tokens: 500
+                        max_tokens: 1024,
+                        tools: hasImage ? undefined : [
+                            {
+                                type: 'web_search',
+                                web_search: {
+                                    enable: true,
+                                    search_result: true
+                                }
+                            }
+                        ]
                     })
                 });
                 
                 const data = await response.json();
                 console.log('API响应:', data);
                 
+                // web_search由平台自动处理，直接从响应中获取回复内容
+                let finalReply = null;
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    finalReply = data.choices[0].message.content;
+                    // 检查是否有搜索引用信息
+                    if (data.web_search && data.web_search.length > 0) {
+                        console.log('联网搜索已执行，搜索结果数:', data.web_search.length);
+                        console.log('搜索引用:', JSON.stringify(data.web_search));
+                    }
+                }
+                
                 document.getElementById('typingIndicator').classList.remove('active');
                 // 隐藏顶栏"正在输入中"状态
                 const typingStatusEl = document.getElementById('chatTypingStatus');
                 if (typingStatusEl) typingStatusEl.classList.remove('show');
                 
-                if (data.choices && data.choices[0]) {
-                    let reply = data.choices[0].message.content;
+                if (finalReply) {
+                    let reply = finalReply;
                     // 繁体中文转换
                     if (characterData.font === '繁体中文') {
                         reply = convertToTraditional(reply);
@@ -6208,7 +6858,25 @@ ${weatherResult}
                         msgDiv.id = item.voiceId;
                         msgDiv.dataset.index = i;
                         const estimatedDuration = Math.max(1, Math.ceil((item.text || '').length / 4));
-                        const hasAudio = !!item.audioUrl;
+                        
+                        // 检查语音是否可用（有audioUrl且未过期或被收藏）
+                        let hasAudio = !!item.audioUrl;
+                        console.log(`渲染语音 ${item.voiceId}: audioUrl存在=${!!item.audioUrl}, expireAt=${item.audioExpireAt ? new Date(item.audioExpireAt).toLocaleString() : '无'}`);
+                        
+                        if (hasAudio && item.audioExpireAt && Date.now() > item.audioExpireAt) {
+                            // 已过期，检查是否被收藏
+                            const isCollected = isVoiceCollected(item.voiceId);
+                            console.log(`  语音已过期，是否被收藏: ${isCollected}`);
+                            if (!isCollected) {
+                                hasAudio = false; // 过期且未收藏，视为不可用
+                                console.log('  -> 显示为加载失败');
+                            } else {
+                                console.log('  -> 已收藏，显示为可用');
+                            }
+                        } else {
+                            console.log(`  -> 显示为${hasAudio ? '可用' : '加载失败'}`);
+                        }
+                        
                         const clickHandler = hasAudio ? `onclick="event.stopPropagation(); playVoiceMessage('${item.voiceId}')"` : '';
                         const durationText = hasAudio ? `${estimatedDuration}"` : '加载失败';
                         const opacityStyle = hasAudio ? '' : 'opacity:0.6;';
@@ -8520,12 +9188,19 @@ ${weatherResult}
             }
 
             console.log('页面加载，开始恢复数据...');
+            
+            // 显示当前北京时间
+            console.log('当前北京时间:', formatBeijingTime('full'));
+            console.log('北京时间详情:', getBeijingTimeParts());
 
             // 初始化表情面板
             initEmojiPanel();
 
             // 清除天气缓存，确保使用最新数据
             clearWeatherCache();
+            
+            // 恢复情绪状态
+            loadEmotionState();
 
             // 加载角色设定
             const savedChar = localStorage.getItem('aiCharacter');
@@ -8547,6 +9222,17 @@ ${weatherResult}
                 try {
                     userData = JSON.parse(savedUser);
                     console.log('用户设定已恢复:', userData);
+                    console.log('用户详细信息:', {
+                        name: userData.name,
+                        gender: userData.gender,
+                        age: userData.age,
+                        birthdate: userData.birthdate,
+                        zodiac: userData.zodiac,
+                        mbti: userData.mbti,
+                        city: userData.city,
+                        relationToPartner: userData.relationToPartner,
+                        outputForPartner: userData.outputForPartner ? userData.outputForPartner.substring(0, 50) + '...' : null
+                    });
                     fillUserForm();
                 } catch (e) {
                     console.error('恢复用户设定失败:', e);
