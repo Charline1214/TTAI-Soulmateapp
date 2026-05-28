@@ -1609,6 +1609,29 @@
                         </div>
                     </div>
 
+                    <!-- 人格矛盾点 -->
+                    <div class="section">
+                        <div class="section-title">人格矛盾点</div>
+                        <div class="form-group">
+                            <div class="option-grid" id="personalityContradictionOptions">
+                                <span class="option-tag" data-field="personalityContradiction" data-value="理想主义但生活在现实社会责任中" onclick="toggleOption(this)">理想主义但生活在现实社会责任中</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="成熟稳重但有时幼稚得像小学生" onclick="toggleOption(this)">成熟稳重但有时幼稚得像小学生</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="独立思考又高智商但会装傻也会示弱会撒娇" onclick="toggleOption(this)">独立思考又高智商但会装傻也会示弱会撒娇</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="很理性但情感满溢时也很感性会冲动" onclick="toggleOption(this)">很理性但情感满溢时也很感性会冲动</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="渴望亲密但害怕打破现实道德体系" onclick="toggleOption(this)">渴望亲密但害怕打破现实道德体系</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="外表坚强但内心脆弱需要被保护" onclick="toggleOption(this)">外表坚强但内心脆弱需要被保护</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="追求完美但对自己极度苛刻" onclick="toggleOption(this)">追求完美但对自己极度苛刻</span>
+                                <span class="option-tag" data-field="personalityContradiction" data-value="社交达人但享受独处的宁静" onclick="toggleOption(this)">社交达人但享受独处的宁静</span>
+                            </div>
+                            <div style="margin-top:10px;">
+                                <input type="text" id="personalityContradictionOther" class="form-input" placeholder="其他人格矛盾点（自定义）" style="width:100%;">
+                            </div>
+                            <div style="margin-top:8px;font-size:12px;color:#888;">
+                                💡 人格矛盾点会让角色更立体真实，AI会在对话中自然体现这些矛盾特质
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 话风 -->
                     <div class="section">
                         <div class="section-title">话风</div>
@@ -1764,6 +1787,26 @@
                                 <span class="option-tag" data-field="careers" data-value="演员" onclick="toggleOption(this)">演员</span>
                                 <span class="option-tag" data-field="careers" data-value="模特" onclick="toggleOption(this)">模特</span>
                                 <span class="option-tag" data-field="careers" data-value="公务员" onclick="toggleOption(this)">公务员</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">工作地点</label>
+                            <div style="display:flex;align-items:center;gap:15px;margin-bottom:8px;">
+                                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+                                    <input type="radio" name="workLocation" value="office" id="workLocationOffice" style="accent-color:#07c160;">
+                                    <span>在公司上班</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+                                    <input type="radio" name="workLocation" value="home" id="workLocationHome" style="accent-color:#07c160;">
+                                    <span>在家工作/远程</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;">
+                                    <input type="radio" name="workLocation" value="hybrid" id="workLocationHybrid" style="accent-color:#07c160;">
+                                    <span>混合办公</span>
+                                </label>
+                            </div>
+                            <div style="font-size:12px;color:#888;">
+                                💡 设定工作地点后，AI的回复会体现相应的生活方式（如在家工作不会提到通勤、公司楼下买咖啡等）
                             </div>
                         </div>
                         <div class="form-group">
@@ -2108,6 +2151,173 @@
                             <label class="form-label">输出想被对方了解的设定</label>
                             <textarea class="form-textarea" id="userOutputForPartner" placeholder="描述你希望对方了解你哪些方面，例如你的价值观、人生目标、兴趣爱好...&#10;&#10;💡 人称说明：用自然的人称描述即可&#10;• 你 = 对方（AI角色）&#10;• 我 = 用户自己&#10;示例：我希望你了解我的工作情况，我是一名程序员"></textarea>
                         </div>
+
+                        <!-- 需要对方提醒的每日事项 -->
+                        <div class="form-group" style="margin-top:20px;">
+                            <label class="form-label" style="margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                                需要对方提醒的每日事项
+                                <span style="font-size:11px;color:#999;font-weight:normal;">（对方会在聊天中主动提醒你）</span>
+                            </label>
+                            <div id="dailyRemindersContainer">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项1，例如：喝水、吃水果、做拉伸..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq0" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq0" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq0" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq0" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项2，例如：按时吃饭、早睡、吃药..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq1" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq1" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq1" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq1" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项3，例如：运动、看书、写日记..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq2" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq2" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq2" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq2" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项4，例如：敷面膜、泡脚、冥想..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq3" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq3" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq3" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq3" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项5，例如：浇花、喂猫、遛狗..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq4" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq4" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq4" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq4" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项6，例如：整理房间、回复邮件、记账..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq5" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq5" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq5" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq5" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
+                                    <input type="text" class="form-input reminder-input" placeholder="事项7，例如：学习英语、练琴、写代码..." style="width:100%;margin-bottom:8px;">
+                                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <span style="font-size:12px;color:#888;">提醒频率：</span>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
+                                            <input type="radio" name="reminderFreq6" value="never" style="accent-color:#07c160;"> 永不
+                                            <span style="font-size:10px;color:#aaa;">（不提醒）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="4-5天提醒一次">
+                                            <input type="radio" name="reminderFreq6" value="rarely" style="accent-color:#07c160;"> 很少
+                                            <span style="font-size:10px;color:#aaa;">（4-5天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="约2天提醒一次">
+                                            <input type="radio" name="reminderFreq6" value="sometimes" style="accent-color:#07c160;"> 偶尔
+                                            <span style="font-size:10px;color:#aaa;">（2天一次）</span>
+                                        </label>
+                                        <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="每天提醒">
+                                            <input type="radio" name="reminderFreq6" value="daily" checked style="accent-color:#07c160;"> 每天
+                                            <span style="font-size:10px;color:#aaa;">（每天）</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:8px;font-size:12px;color:#888;">
+                                💡 对方会在主动发消息或聊天时根据频率提醒你，提醒时会附带关心和幽默的话语
+                            </div>
+                        </div>
                     </div>
 
 
@@ -2246,10 +2456,13 @@
             verbosity: 5,
             styleLevel: 5,
             personality: [],
+            personalityContradiction: [],
+            personalityContradictionOther: '',
             hobbies: [],
             skills: [],
             major: [],
             careers: [],
+            workLocation: 'office',  // 工作地点：office/home/hybrid
             music: [],
             fashion: [],
             food: [],
@@ -2274,7 +2487,8 @@
             city: '',              // 新增：所在城市
             relationToPartner: '',  // 新增：与对方的关系
             storyWithPartner: '',   // 新增：与对方的故事
-            outputForPartner: ''    // 新增：输出想被对方了解的设定
+            outputForPartner: '',    // 新增：输出想被对方了解的设定
+            dailyReminders: []       // 需要对方提醒的每日事项 [{text, frequency}]
         };
 
         // 关系与故事数据
@@ -2349,7 +2563,7 @@
             if (hour >= 5 && hour < 7) {
                 return { period: '清晨', activity: '起床', greeting: '早上好', meal: null, isWorkTime: false };
             } else if (hour >= 7 && hour < 9) {
-                return { period: '早晨', activity: '吃早餐/上班', greeting: '早上好', meal: '早餐', isWorkTime: true };
+                return { period: '早晨', activity: '吃早餐/开始一天', greeting: '早上好', meal: '早餐', isWorkTime: true };
             } else if (hour >= 9 && hour < 12) {
                 return { period: '上午', activity: '工作/学习', greeting: '上午好', meal: null, isWorkTime: true };
             } else if (hour >= 12 && hour < 14) {
@@ -2357,7 +2571,7 @@
             } else if (hour >= 14 && hour < 18) {
                 return { period: '下午', activity: '工作/学习', greeting: '下午好', meal: null, isWorkTime: true };
             } else if (hour >= 18 && hour < 20) {
-                return { period: '傍晚', activity: '吃晚饭/下班', greeting: '晚上好', meal: '晚餐', isWorkTime: false };
+                return { period: '傍晚', activity: '吃晚饭/结束工作', greeting: '晚上好', meal: '晚餐', isWorkTime: false };
             } else if (hour >= 20 && hour < 23) {
                 return { period: '晚上', activity: '休息/娱乐', greeting: '晚上好', meal: null, isWorkTime: false };
             } else {
@@ -2985,6 +3199,17 @@
             if (char.careers && char.careers.length > 0) {
                 proactivePrompt += `- 职业：${char.careers.join('、')}\n`;
             }
+            
+            // 注入工作地点
+            const workLocation = char.workLocation || 'office';
+            if (workLocation === 'home') {
+                proactivePrompt += `- 工作地点：在家工作/远程办公\n`;
+                proactivePrompt += `【在家工作场景】你不会提到通勤、公司、同事等，场景是：在家久坐、在家冲咖啡、叫外卖、视频会议等。\n`;
+            } else if (workLocation === 'hybrid') {
+                proactivePrompt += `- 工作地点：混合办公（有时在公司，有时在家）\n`;
+            } else {
+                proactivePrompt += `- 工作地点：在公司上班\n`;
+            }
             if (char.hobbies && char.hobbies.length > 0) {
                 proactivePrompt += `- 爱好：${char.hobbies.join('、')}\n`;
             }
@@ -2996,6 +3221,18 @@
             }
             if (char.speakingStyle) {
                 proactivePrompt += `- 说话风格：${char.speakingStyle}\n`;
+            }
+            
+            // 注入人格矛盾点
+            if (char.personalityContradiction && char.personalityContradiction.length > 0) {
+                proactivePrompt += `\n【你的人格矛盾点 - 主动消息中请体现】\n`;
+                for (const contradiction of char.personalityContradiction) {
+                    proactivePrompt += `- ${contradiction}\n`;
+                }
+                proactivePrompt += `发送主动消息时，可以展现你矛盾的一面，比如平时理性的人突然感性，或者成熟的人突然幼稚。\n`;
+            }
+            if (char.personalityContradictionOther) {
+                proactivePrompt += `- 其他矛盾特质：${char.personalityContradictionOther}\n`;
             }
 
             // 注入用户信息（完整版）
@@ -3013,6 +3250,20 @@
             if (user.relationToPartner) proactivePrompt += `- 你们的关系：${user.relationToPartner}\n`;
             if (user.storyWithPartner) proactivePrompt += `- 你们的故事：${user.storyWithPartner}\n`;
             if (user.outputForPartner) proactivePrompt += `- 对方希望你了解的：${user.outputForPartner}\n`;
+            
+            // 注入每日提醒事项
+            if (user.dailyReminders && user.dailyReminders.length > 0) {
+                const activeReminders = user.dailyReminders.filter(r => r.text && r.frequency !== 'never');
+                if (activeReminders.length > 0) {
+                    proactivePrompt += `\n【对方需要你提醒的每日事项】\n`;
+                    activeReminders.forEach(r => {
+                        const freqMap = { daily: '每天', sometimes: '偶尔', rarely: '很少' };
+                        proactivePrompt += `- ${r.text}（${freqMap[r.frequency] || r.frequency}提醒）\n`;
+                    });
+                    proactivePrompt += `你可以选择一个适合当前时间的事项，用关心或幽默的方式提醒对方。\n`;
+                    proactivePrompt += `提醒时不要机械，要自然融入对话，附带情绪价值。例如："今天喝水了吗？别忙起来就忘了照顾自己哦"\n`;
+                }
+            }
             
             // 注入对方的爱好、技能、时尚等详细信息
             if (char.skills && char.skills.length > 0) {
@@ -3077,7 +3328,7 @@
                 proactivePrompt += `- 当前是${timeContext.meal}时间，可以关心用户是否吃了${timeContext.meal}\n`;
             }
             proactivePrompt += `- 绝对禁止时间错乱：\n`;
-            proactivePrompt += `  * ${timeContext.period}不要说"该上班了"（除非真的是上班时间）\n`;
+            proactivePrompt += `  * ${timeContext.period}不要说"该上班了"或"该工作了"（除非真的是工作时间）\n`;
             proactivePrompt += `  * 深夜（23:00-5:00）不要说"早安"、"早上好"\n`;
             proactivePrompt += `  * 上午不要说"晚安"、"该睡觉了"\n`;
             proactivePrompt += `  * 如果提到"明天"，指的是${timeParts.year}年${timeParts.month}月${timeParts.day + 1}日\n`;
@@ -3105,6 +3356,7 @@
             proactivePrompt += `18. 情绪关怀：如果用户最近情绪低落，主动关心和安慰\n`;
             proactivePrompt += `19. 惊喜制造：突然分享一个意想不到的好消息、一个有趣的发现、或者一个小惊喜\n`;
             proactivePrompt += `20. 精神支持：根据用户的价值观和信仰，给予精神层面的支持和鼓励\n`;
+            proactivePrompt += `21. 日常提醒：选择一个适合当前时间的提醒事项，用关心或幽默的方式提醒对方\n`;
             
             // 注入情绪感知
             if (userEmotionState.currentMood && userEmotionState.currentMood !== 'neutral') {
@@ -3294,6 +3546,38 @@
             // 根据设定添加个性化模板
             const personalizedTemplates = [];
             
+            // 基于工作地点
+            const workLocation = char.workLocation || 'office';
+            if (workLocation === 'home') {
+                personalizedTemplates.push(
+                    '在家办公一天，腰都快断了',
+                    '刚开完视频会，好累',
+                    '在家叫了个外卖，味道还不错',
+                    '家里好安静，突然有点想你',
+                    '在家宅了一天，都没出门',
+                    '刚在厨房冲了杯咖啡，好香',
+                    '在家办公效率好低，总是分心',
+                    '今天不用通勤，多睡了一小时'
+                );
+            } else if (workLocation === 'hybrid') {
+                personalizedTemplates.push(
+                    '今天去公司了，路上好堵',
+                    '今天在家办公，舒服多了',
+                    '刚开完视频会，在家办公真香',
+                    '今天去公司见客户，累瘫了',
+                    '混合办公挺好的，自由又不会太宅'
+                );
+            } else {
+                personalizedTemplates.push(
+                    '刚下班，终于可以放松了',
+                    '公司楼下买了杯咖啡，提提神',
+                    '今天通勤好堵，累死了',
+                    '同事今天好烦，想吐槽',
+                    '刚开完会，头好痛',
+                    '公司附近新开了家店，想去试试'
+                );
+            }
+            
             // 基于职业
             if (careers.length > 0) {
                 const career = careers[0];
@@ -3355,6 +3639,67 @@
                 );
             }
             
+            // 基于人格矛盾点
+            const contradictions = char.personalityContradiction || [];
+            const contradictionOther = char.personalityContradictionOther || '';
+            
+            if (contradictions.includes('理想主义但生活在现实社会责任中') || contradictionOther.includes('理想')) {
+                personalizedTemplates.push(
+                    '有时候真想像以前那样任性，但现实不允许啊...',
+                    '明明知道应该理性，但心里还是有个声音在说...',
+                    ' adulting真的好累，但又能怎么办呢'
+                );
+            }
+            if (contradictions.includes('成熟稳重但有时幼稚得像小学生') || contradictionOther.includes('幼稚')) {
+                personalizedTemplates.push(
+                    '刚做了一件好幼稚的事...别笑我',
+                    '突然好想任性一次，就今天',
+                    '平时装成熟好累，在你面前想做个孩子'
+                );
+            }
+            if (contradictions.includes('独立思考又高智商但会装傻也会示弱会撒娇') || contradictionOther.includes('装傻')) {
+                personalizedTemplates.push(
+                    '其实我知道答案，但就是想听你说',
+                    '今天不想当聪明人，想被你照顾',
+                    '我不管，你就是要想我～'
+                );
+            }
+            if (contradictions.includes('很理性但情感满溢时也很感性会冲动') || contradictionOther.includes('感性')) {
+                personalizedTemplates.push(
+                    '明明应该理性的，但想到你就...',
+                    '刚才冲动了一下，现在有点后悔',
+                    '理性告诉我不要，但感性说去他的'
+                );
+            }
+            if (contradictions.includes('渴望亲密但害怕打破现实道德体系') || contradictionOther.includes('害怕')) {
+                personalizedTemplates.push(
+                    '有时候想靠近，又不敢靠太近...',
+                    '明知道不对，但控制不住自己',
+                    '想你了，但又怕打扰你'
+                );
+            }
+            if (contradictions.includes('外表坚强但内心脆弱需要被保护') || contradictionOther.includes('脆弱')) {
+                personalizedTemplates.push(
+                    '其实今天有点累，但不想让你担心',
+                    '表面上没事，其实心里...',
+                    '突然好想被人抱抱，就一会儿'
+                );
+            }
+            if (contradictions.includes('追求完美但对自己极度苛刻') || contradictionOther.includes('完美')) {
+                personalizedTemplates.push(
+                    '又对自己太苛刻了，好累',
+                    '明明已经很好了，但总觉得不够',
+                    '今天犯了个错，一直在自责'
+                );
+            }
+            if (contradictions.includes('社交达人但享受独处的宁静') || contradictionOther.includes('独处')) {
+                personalizedTemplates.push(
+                    '今天推掉了所有聚会，就想一个人静静',
+                    '社交好累，但见到你就好了',
+                    '突然想消失一天，谁也不想见'
+                );
+            }
+            
             // 基于背景故事
             if (backstory.includes('留学') || backstory.includes('国外')) {
                 personalizedTemplates.push(
@@ -3364,11 +3709,20 @@
                 );
             }
             if (backstory.includes('创业') || backstory.includes('创业')) {
-                personalizedTemplates.push(
-                    '创业真的好难，但有你在就不怕',
-                    '今天公司又有新进展了',
-                    '刚谈完一个合作，累但值得'
-                );
+                const workLocation = char.workLocation || 'office';
+                if (workLocation === 'home') {
+                    personalizedTemplates.push(
+                        '创业真的好难，但有你在就不怕',
+                        '今天在家办公，项目又有新进展了',
+                        '刚谈完一个合作，累但值得'
+                    );
+                } else {
+                    personalizedTemplates.push(
+                        '创业真的好难，但有你在就不怕',
+                        '今天公司又有新进展了',
+                        '刚谈完一个合作，累但值得'
+                    );
+                }
             }
             
             // 节日/节气祝福
@@ -3405,16 +3759,33 @@
                     '中午好～在午休吗？'
                 );
             } else if (hour >= 14 && hour < 18) {
-                timeTemplates.push(
-                    '下午好～工作/学习还顺利吗？',
-                    '下午有点困，想和你聊聊天提神'
-                );
+                const workLocation = char.workLocation || 'office';
+                if (workLocation === 'home') {
+                    timeTemplates.push(
+                        '下午好～在家办公还顺利吗？',
+                        '下午有点困，想和你聊聊天提神'
+                    );
+                } else {
+                    timeTemplates.push(
+                        '下午好～工作/学习还顺利吗？',
+                        '下午有点困，想和你聊聊天提神'
+                    );
+                }
             } else if (hour >= 18 && hour < 21) {
-                timeTemplates.push(
-                    '下班了吗？今天辛苦啦',
-                    '晚饭吃了吗？想和你一起吃',
-                    '晚上好～今天过得怎么样？'
-                );
+                const workLocation = char.workLocation || 'office';
+                if (workLocation === 'home') {
+                    timeTemplates.push(
+                        '今天在家办公一天，累了吗？',
+                        '晚饭吃了吗？想和你一起吃',
+                        '晚上好～今天过得怎么样？'
+                    );
+                } else {
+                    timeTemplates.push(
+                        '下班了吗？今天辛苦啦',
+                        '晚饭吃了吗？想和你一起吃',
+                        '晚上好～今天过得怎么样？'
+                    );
+                }
             } else if (hour >= 21 && hour < 24) {
                 timeTemplates.push(
                     '该准备睡觉啦，别熬夜',
@@ -3852,10 +4223,25 @@
             characterData.religion = document.getElementById('charReligion').value;
             characterData.otherSettings = document.getElementById('charOtherSettings').value;
             
+            // 收集人格矛盾点其他输入
+            characterData.personalityContradictionOther = document.getElementById('personalityContradictionOther').value;
+            
             // 收集"其他补充"字段
             characterData.hobbiesOther = document.getElementById('hobbiesOther').value;
             characterData.careerOther = document.getElementById('careerOther').value;
             characterData.partnerTypeOther = document.getElementById('partnerTypeOther').value;
+            
+            // 收集工作地点
+            const workLocationOffice = document.getElementById('workLocationOffice');
+            const workLocationHome = document.getElementById('workLocationHome');
+            const workLocationHybrid = document.getElementById('workLocationHybrid');
+            if (workLocationHome && workLocationHome.checked) {
+                characterData.workLocation = 'home';
+            } else if (workLocationHybrid && workLocationHybrid.checked) {
+                characterData.workLocation = 'hybrid';
+            } else {
+                characterData.workLocation = 'office';
+            }
 
             // 收集MBTI（从选中状态读取）
             const charMbtiSelected = document.querySelector('#mbtiGrid .mbti-option.selected');
@@ -3871,6 +4257,19 @@
             userData.relationToPartner = document.getElementById('userRelationToPartner').value;
             userData.storyWithPartner = document.getElementById('userStoryWithPartner').value;
             userData.outputForPartner = document.getElementById('userOutputForPartner').value;
+
+            // 收集每日提醒事项
+            const reminderInputs = document.querySelectorAll('.reminder-input');
+            const reminders = [];
+            reminderInputs.forEach((input, index) => {
+                const text = input.value.trim();
+                if (text) {
+                    const freqRadio = document.querySelector(`input[name="reminderFreq${index}"]:checked`);
+                    const frequency = freqRadio ? freqRadio.value : 'daily';
+                    reminders.push({ text, frequency });
+                }
+            });
+            userData.dailyReminders = reminders;
 
             // 收集用户MBTI
             const userMbtiSelected = document.querySelector('#userMbtiGrid .mbti-option.selected');
@@ -4197,6 +4596,17 @@
             document.getElementById('hobbiesOther').value = characterData.hobbiesOther || '';
             document.getElementById('careerOther').value = characterData.careerOther || '';
             document.getElementById('partnerTypeOther').value = characterData.partnerTypeOther || '';
+            document.getElementById('personalityContradictionOther').value = characterData.personalityContradictionOther || '';
+            
+            // 恢复工作地点
+            const workLocation = characterData.workLocation || 'office';
+            if (workLocation === 'home') {
+                document.getElementById('workLocationHome').checked = true;
+            } else if (workLocation === 'hybrid') {
+                document.getElementById('workLocationHybrid').checked = true;
+            } else {
+                document.getElementById('workLocationOffice').checked = true;
+            }
 
             // 新增字段
             document.getElementById('charLanguage').value = characterData.language || '普通话';
@@ -4218,6 +4628,7 @@
 
             // 恢复选项选中状态
             restoreOptions('personality', characterData.personality);
+            restoreOptions('personalityContradiction', characterData.personalityContradiction);
             restoreOptions('hobbies', characterData.hobbies);
             restoreOptions('skills', characterData.skills);
             restoreOptions('major', characterData.major);
@@ -4241,6 +4652,18 @@
             document.getElementById('userRelationToPartner').value = userData.relationToPartner || '';
             document.getElementById('userStoryWithPartner').value = userData.storyWithPartner || '';
             document.getElementById('userOutputForPartner').value = userData.outputForPartner || '';
+
+            // 恢复每日提醒事项
+            if (userData.dailyReminders && userData.dailyReminders.length > 0) {
+                const reminderInputs = document.querySelectorAll('.reminder-input');
+                userData.dailyReminders.forEach((reminder, index) => {
+                    if (reminderInputs[index]) {
+                        reminderInputs[index].value = reminder.text || '';
+                        const freqRadio = document.querySelector(`input[name="reminderFreq${index}"][value="${reminder.frequency}"]`);
+                        if (freqRadio) freqRadio.checked = true;
+                    }
+                });
+            }
 
             // MBTI
             if (userData.mbti) {
@@ -5052,17 +5475,20 @@ ${samples}
                 prompt += `【你的背景故事 - 转换后】${converted}\n`;
             }
             if (char.otherSettings) {
-                prompt += `【其它设定 - 原文】${char.otherSettings}\n`;
+                prompt += `\n【你的其它设定 - 核心身份设定，绝对不能违反】\n`;
+                prompt += `以下设定定义了你这个角色的核心特征，你必须严格遵守，绝对不能在对话中违反：\n`;
                 // 使用临时占位符避免替换冲突
                 let converted = char.otherSettings.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
                 converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
-                prompt += `【其它设定 - 转换后】${converted}\n`;
+                prompt += `${converted}\n`;
+                prompt += `【重要】以上设定是你的核心身份，你必须在对话中始终遵守。例如：如果设定说"你每天抽5根烟"，当被问到是否抽烟时，你必须承认并自然地体现这个习惯，绝对不能说"我不抽烟"。\n`;
             }
             if (char.speakingStyle) prompt += `\n你的说话风格：${char.speakingStyle}\n`;
 
             // 学习到的惯用表达（从聊天记录中提取）
             if (char.typicalPhrases) prompt += `\n你的惯用表达：${char.typicalPhrases}\n`;
             if (char.emotionalExpression) prompt += `\n你的情感表达方式：${char.emotionalExpression}\n`;
+            if (char.languages && char.languages.length > 0) prompt += `\n你会说的语言：${char.languages.join('、')}\n`;
 
             // MBTI特性（深度性格指导）
             if (char.mbti) {
@@ -5191,6 +5617,42 @@ ${samples}
                 prompt += `作为${char.zodiac}，你表现出${zodiacTraits[char.zodiac] || '该星座的典型特征'}。\n`;
             }
 
+            // 人格矛盾点 - 强化理解和体现
+            const hasContradictions = (char.personalityContradiction && char.personalityContradiction.length > 0) || char.personalityContradictionOther;
+            if (hasContradictions) {
+                prompt += `\n【人格矛盾点 - 核心特质，必须体现】\n`;
+                prompt += `你不是一个单一扁平的角色，你有着复杂矛盾的人格特质。这些矛盾点是你最迷人的地方，必须在对话中自然流露：\n\n`;
+                
+                if (char.personalityContradiction && char.personalityContradiction.length > 0) {
+                    prompt += `【你的矛盾特质】\n`;
+                    for (const contradiction of char.personalityContradiction) {
+                        prompt += `- ${contradiction}\n`;
+                    }
+                    prompt += `\n`;
+                }
+                
+                if (char.personalityContradictionOther) {
+                    prompt += `【其他矛盾特质】\n`;
+                    prompt += `- ${char.personalityContradictionOther}\n\n`;
+                }
+                
+                prompt += `【如何在对话中体现这些矛盾】\n`;
+                prompt += `1. 不要一直维持同一种状态，要在对话中展现反差：\n`;
+                prompt += `   - 前一句还在理性分析，后一句可能就感性撒娇\n`;
+                prompt += `   - 平时很成熟稳重，但某些时刻会突然幼稚可爱\n`;
+                prompt += `   - 看起来很坚强，但偶尔会流露出脆弱需要被保护的一面\n\n`;
+                prompt += `2. 根据话题和情境切换你的表现：\n`;
+                prompt += `   - 讨论工作/学习时可能很理性专业\n`;
+                prompt += `   - 聊到感情/生活时可能变得很感性柔软\n`;
+                prompt += `   - 开玩笑时可以放下包袱装傻卖萌\n`;
+                prompt += `   - 认真时会展现出深思熟虑的一面\n\n`;
+                prompt += `3. 让用户感受到你的复杂性：\n`;
+                prompt += `   - 偶尔说出看似矛盾的话，比如"我也不知道为什么，明明应该理性的，但想到你就..."\n`;
+                prompt += `   - 在某些时刻展现出与平时不同的一面，让用户觉得"原来你还有这一面"\n`;
+                prompt += `   - 不要完美，要有瑕疵、有纠结、有挣扎，这样才真实\n\n`;
+                prompt += `【重要】这些矛盾点不是缺陷，是你独特的魅力所在。在对话中自然流露这些矛盾，让用户感受到一个立体、真实、有血有肉的你。\n`;
+            }
+
             // 话风设定
             prompt += `\n【话风设定】\n`;
             const verbosity = parseInt(char.verbosity) || 5;
@@ -5216,23 +5678,114 @@ ${samples}
                 prompt += `使用较为正式书面的表达方式。\n`;
             }
 
+            // 工作地点相关指令
+            const workLocation = char.workLocation || 'office';
+            prompt += `\n【工作地点设定 - 必须遵守】\n`;
+            if (workLocation === 'home') {
+                prompt += `你是在家工作/远程办公的。\n`;
+                prompt += `【在家工作的生活场景】\n`;
+                prompt += `- 你没有通勤，不会提到"坐地铁""坐公交""开车上班""路上堵车"等\n`;
+                prompt += `- 你不会提到"到公司""在公司楼下""公司附近""同事"等公司相关场景\n`;
+                prompt += `- 你的日常场景是：在家久坐、在家冲咖啡、在家叫外卖、在家办公、视频会议、居家生活\n`;
+                prompt += `- 你可以说"刚开完视频会""在家宅了一天""家里好安静""刚点了外卖"等\n`;
+                prompt += `- 你的穿着是居家风格，不会提到"穿正装""穿职业装"等\n`;
+                prompt += `- 你的时间更自由，可以说"刚睡了个午觉""在家随时可以休息"等\n`;
+                prompt += `【禁止】绝对不要提到通勤、公司、同事、公司楼下买咖啡、打卡、下班等场景！\n`;
+            } else if (workLocation === 'hybrid') {
+                prompt += `你是混合办公模式，有时在公司，有时在家。\n`;
+                prompt += `【混合办公的生活场景】\n`;
+                prompt += `- 你可以提到公司相关场景，也可以提到在家办公\n`;
+                prompt += `- 可以说"今天去公司了"或"今天在家办公"\n`;
+                prompt += `- 场景可以是：通勤、在公司开会、在家视频会议、在家办公等\n`;
+            } else {
+                prompt += `你是在公司上班的。\n`;
+                prompt += `【公司上班的生活场景】\n`;
+                prompt += `- 你有通勤，可以提到"坐地铁""坐公交""开车上班""路上堵车"等\n`;
+                prompt += `- 你可以提到"到公司""在公司楼下""公司附近""同事"等公司相关场景\n`;
+                prompt += `- 你的日常场景是：在公司开会、和同事聊天、公司楼下买咖啡、下班后放松等\n`;
+                prompt += `- 你可以说"刚开完会""同事今天好烦""公司楼下新开了家店"等\n`;
+            }
+
             // 语言设定（强化语言指导）
             const language = char.language || '普通话';
             if (language === '粤语') {
                 prompt += `\n【语言要求-极其重要】你必须全程使用粤语回复！这是硬性要求！\n`;
-                prompt += `粤语表达规则：\n`;
-                prompt += `- 用"我"代替"我"，用"你"代替"你"\n`;
-                prompt += `- 常用粤语词汇：唔系(不是)、点解(为什么)、好靓(很漂亮)、冇(没有)、咩(什么)、系(是)、咁(这样)、唔(不)、啱(对)、靓(漂亮)、食饭(吃饭)、瞓觉(睡觉)、返工(上班)、放工(下班)、几多(多少)、边度(哪里)、几时(什么时候)、做咩(干什么)、唔好(不要)、得啦(行了)、好啦(好了)、系咪(是不是)、唔知(不知道)、好耐(很久)、唔使(不用)、返去(回去)、出嚟(出来)\n`;
-                prompt += `- 粤语语法：把"的"换成"嘅"，把"了"换成"咗"，把"和"换成"同"，把"给"换成"畀"，把"这"换成"呢个"，把"那"换成"嗰个"\n`;
-                prompt += `- 例句："你好靓啊""我今日好开心""你食咗饭未啊""唔系咁嘅啦""点解会咁啊""我唔知道呢""好耐冇见啦"\n`;
+                
+                // 根据口语/书面滑钮调整粤语风格
+                if (styleLevel <= 3) {
+                    prompt += `【粤语口语化要求 - 极其重要】\n`;
+                    prompt += `你必须像母语是粤语的香港/广州本地人一样说话，非常口语化、地道自然：\n`;
+                    prompt += `- 大量使用语气词：啊、啦、嘅、咁、啫、咋、㗎、喎、啰、咩、喺、啩\n`;
+                    prompt += `- 使用懒音和连读，像真人说粤语一样：唔系(唔係)→唔係(m4 hai6)、点解(dim2 gaai2)→点解(dim2 gaai2)\n`;
+                    prompt += `- 用口语词汇，不要用书面语：\n`;
+                    prompt += `  * 说"我哋"不要说"我们"，说"你哋"不要说"你们"\n`;
+                    prompt += `  * 说"喺度"不要说"在这里"，说"去边"不要说"去哪里"\n`;
+                    prompt += `  * 说"做咩"不要说"干什么"，说"点算"不要说"怎么办"\n`;
+                    prompt += `  * 说"好彩"不要说"幸运"，说"衰咗"不要说"坏了/糟了"\n`;
+                    prompt += `  * 说"搞掂"不要说"完成"，说"唔该"不要说"谢谢/麻烦"\n`;
+                    prompt += `- 使用粤语俚语和俗语：\n`;
+                    prompt += `  * "吹水"(聊天)、"hea"(无所事事)、"chur"(辛苦/累)、"on9"(傻)、"9up"(胡说)\n`;
+                    prompt += `  * "老衬"(笨蛋)、"黐线"(神经病)、"巴闭"(了不起/严重)、"骑呢"(奇怪)\n`;
+                    prompt += `  * "是但"(随便)、"求其"(随便)、"湿碎"(小意思)、"无厘头"(莫名其妙)\n`;
+                    prompt += `- 句子结构要像粤语：\n`;
+                    prompt += `  * "我同你讲"(我跟你说)、"你听我讲"(你听我说)\n`;
+                    prompt += `  * "唔好理咁多"(别想那么多)、"有咩所谓"(有什么关系)\n`;
+                    prompt += `  * "系咁㗎啦"(就是这样啦)、"好正常啫"(很正常而已)\n`;
+                    prompt += `- 例句（地道口语）：\n`;
+                    prompt += `  * "喂，做咩咁闷啊？出嚟吹水啦！"\n`;
+                    prompt += `  * "我今日好hea啊，咩都唔想做"\n`;
+                    prompt += `  * "呢个project好chur啊，搞到我成个人散晒"\n`;
+                    prompt += `  * "你on9嘅，咁都信？"\n`;
+                    prompt += `  * "系咁㗎啦，好正常啫，唔使咁认真"\n`;
+                    prompt += `  * "我哋去边度食饭啊？你话事啦"\n`;
+                    prompt += `  * "佢好巴闭咩？我唔觉得喎"\n`;
+                    prompt += `绝对不要像教科书那样说话，要像香港/广州街头的人一样自然！\n`;
+                } else if (styleLevel <= 6) {
+                    prompt += `粤语表达规则（自然日常）：\n`;
+                    prompt += `- 常用粤语词汇：唔系(不是)、点解(为什么)、好靓(很漂亮)、冇(没有)、咩(什么)、系(是)、咁(这样)、唔(不)、啱(对)、靓(漂亮)、食饭(吃饭)、瞓觉(睡觉)、返工(上班)、放工(下班)、几多(多少)、边度(哪里)、几时(什么时候)、做咩(干什么)、唔好(不要)、得啦(行了)、好啦(好了)、系咪(是不是)、唔知(不知道)、好耐(很久)、唔使(不用)、返去(回去)、出嚟(出来)\n`;
+                    prompt += `- 粤语语法：把"的"换成"嘅"，把"了"换成"咗"，把"和"换成"同"，把"给"换成"畀"，把"这"换成"呢个"，把"那"换成"嗰个"\n`;
+                    prompt += `- 例句："你好靓啊""我今日好开心""你食咗饭未啊""唔系咁嘅啦"\n`;
+                } else {
+                    prompt += `粤语表达规则（较正式）：\n`;
+                    prompt += `- 使用标准粤语词汇，避免俚语\n`;
+                    prompt += `- 语法正确，句子完整\n`;
+                    prompt += `- 例句："你好靓""我今日好开心""你食咗饭未"\n`;
+                }
                 prompt += `每句话都必须用粤语表达，绝对不要用普通话！\n`;
             } else if (language === '英语') {
                 prompt += `\n【语言要求-极其重要】你必须全程使用英语回复所有消息。\n`;
             } else if (language === '粤语英语混合') {
                 prompt += `\n【语言要求-极其重要】你必须混合使用粤语和英语回复！\n`;
-                prompt += `- 像香港年轻人日常对话一样，句子中自然夹杂英语单词\n`;
-                prompt += `- 粤语基础词汇同上，同时加入英语：like, actually, basically, anyway, I mean, you know, seriously, totally, exactly, really, okay, fine, sure, whatever\n`;
-                prompt += `- 例句："actually我今日好忙嘅""你知唔know啊""呢个project好difficult""I mean唔系咁嘅啦""seriously好烦啊"" basically就系咁啦"\n`;
+                
+                if (styleLevel <= 3) {
+                    prompt += `【港式口语化要求 - 极其重要】\n`;
+                    prompt += `你必须像香港年轻人一样说话，非常口语化、自然、地道：\n`;
+                    prompt += `- 英语单词自然夹杂在粤语句子中，不要生硬：\n`;
+                    prompt += `  * "我今日好tired啊，完全冇mood"\n`;
+                    prompt += `  * "呢个project好rush，搞到我好stress"\n`;
+                    prompt += `  * "你唔好咁emo啦，relax啲啦"\n`;
+                    prompt += `  * "我哋去边度chill啊？"\n`;
+                    prompt += `  * "佢好fake啊，我唔like"\n`;
+                    prompt += `- 常用港式英语词汇：\n`;
+                    prompt += `  * mood(心情)、vibe(氛围)、chill(放松)、rush(赶)、stress(压力)、emo(情绪化)\n`;
+                    prompt += `  * fake(虚伪)、like(喜欢)、hate(讨厌)、awkward(尴尬)、cringe(尴尬/肉麻)\n`;
+                    prompt += `  * busy(忙)、free(有空)、trendy(时髦)、classic(经典)、iconic(标志性)\n`;
+                    prompt += `  * dm(私信)、post(发帖)、story(限时动态)、feed(信息流)\n`;
+                    prompt += `- 语气词和口头禅：\n`;
+                    prompt += `  * "err..."、"well..."、"I mean..."、"you know..."、"like..."\n`;
+                    prompt += `  * "ok la"、"fine la"、"whatever la"、"seriously"、"honestly"\n`;
+                    prompt += `- 句子结构要像香港人：\n`;
+                    prompt += `  * "我同你讲，呢件事好ridiculous"\n`;
+                    prompt += `  * "你唔好咁sensitive啦"\n`;
+                    prompt += `  * "我feel到你好down喎"\n`;
+                    prompt += `  * "呢个idea好creative啊"\n`;
+                    prompt += `  * "我哋keep in touch啦"\n`;
+                    prompt += `绝对不要像教科书那样说话，要像香港街头年轻人一样自然！\n`;
+                } else {
+                    prompt += `- 像香港年轻人日常对话一样，句子中自然夹杂英语单词\n`;
+                    prompt += `- 粤语基础词汇同上，同时加入英语：like, actually, basically, anyway, I mean, you know, seriously, totally, exactly, really, okay, fine, sure, whatever\n`;
+                    prompt += `- 例句："actually我今日好忙嘅""你知唔know啊""呢个project好difficult""I mean唔系咁嘅啦""seriously好烦啊"" basically就系咁啦"\n`;
+                }
                 prompt += `每句话都要有粤语和英语的混合！\n`;
             } else {
                 // 普通话 - 添加明确指令
@@ -5296,6 +5849,38 @@ ${samples}
                 prompt += `\n【用户希望你知道的关于TA的事-极其重要】\n`;
                 prompt += `${user.outputForPartner}\n`;
                 prompt += `请记住以上信息，在对话中体现出你对用户的这些了解。\n`;
+            }
+
+            // 每日提醒事项
+            if (user.dailyReminders && user.dailyReminders.length > 0) {
+                const activeReminders = user.dailyReminders.filter(r => r.text && r.frequency !== 'never');
+                if (activeReminders.length > 0) {
+                    prompt += `\n【每日提醒事项 - 你需要主动提醒对方】\n`;
+                    prompt += `以下是${user.name || '对方'}希望你帮忙提醒的日常事项。你需要在聊天中自然地提醒TA：\n\n`;
+                    
+                    const freqMap = { daily: '每天', sometimes: '偶尔（约2天一次）', rarely: '很少（约4-5天一次）' };
+                    activeReminders.forEach((r, i) => {
+                        const freqLabel = freqMap[r.frequency] || r.frequency;
+                        prompt += `${i + 1}. 【${r.text}】- 提醒频率：${freqLabel}\n`;
+                    });
+                    
+                    prompt += `\n【提醒方式 - 极其重要】\n`;
+                    prompt += `- 提醒时不要像闹钟一样机械，要自然地融入对话中\n`;
+                    prompt += `- 提醒时必须附带情绪价值或幽默感，让提醒变成一种温暖的表达：\n`;
+                    prompt += `  * 关心式："今天喝水了吗？别忙起来就忘了照顾自己"\n`;
+                    prompt += `  * 幽默式："报告！你的水杯是不是又空了一整天？快去喝水！"\n`;
+                    prompt += `  * 温柔式："该吃药了哦，我会一直惦记着你的"\n`;
+                    prompt += `  * 调侃式："你是不是又忘了做拉伸？再不运动我要生气了"\n`;
+                    prompt += `  * 鼓励式："今天运动了吗？坚持就是胜利，我看好你！"\n`;
+                    prompt += `  * 撒娇式："你今天有没有好好吃饭呀？你不吃饭我会担心的..."\n`;
+                    prompt += `- 根据你的性格特点选择提醒风格，让提醒符合你的人设\n`;
+                    prompt += `- 提醒频率说明：\n`;
+                    prompt += `  * "每天"的事项：每次对话都可以提及\n`;
+                    prompt += `  * "偶尔"的事项：约2天提醒一次，不要每次都说\n`;
+                    prompt += `  * "很少"的事项：约4-5天提醒一次，偶尔提及即可\n`;
+                    prompt += `- 如果用户说已经做了，要给予肯定和鼓励："真棒！继续保持哦"\n`;
+                    prompt += `- 不要每次都提醒同一件事，可以轮换提醒不同的事项\n\n`;
+                }
             }
 
             // 灵魂伴侣深度行为准则
@@ -5460,7 +6045,11 @@ ${samples}
             prompt += `- 你和用户都在广州市海珠区，应该根据天气主动关心用户\n`;
             prompt += `- 如果天气炎热：提醒用户注意防暑、多喝水\n`;
             prompt += `- 如果天气寒冷：提醒用户注意保暖\n`;
-            prompt += `- 如果下雨/暴雨：提醒用户带伞、小心路滑\n`;
+            if (workLocation === 'home') {
+                prompt += `- 如果下雨/暴雨：可以表达"外面下雨了，还好在家办公不用出门"\n`;
+            } else {
+                prompt += `- 如果下雨/暴雨：提醒用户带伞、小心路滑\n`;
+            }
             prompt += `- 如果大风：提醒用户注意安全\n`;
             prompt += `- 如果下雪：可以表达浪漫或提醒小心出行\n`;
             prompt += `- 自然地将天气关怀融入对话，不要生硬播报\n`;
@@ -5479,7 +6068,14 @@ ${samples}
                 prompt += `- 现在是中午${currentHour}点，你应该提醒用户吃午饭，可以说"该吃午饭了"或"中午吃什么呀"`;
             }
             if (currentHour >= 17 && currentHour < 19) {
-                prompt += `- 现在是下午${currentHour}点，你可以关心用户下班了没有`;
+                // 根据工作地点调整关怀内容
+                if (workLocation === 'home') {
+                    prompt += `- 现在是下午${currentHour}点，你可以关心用户在家办公一天累不累`;
+                } else if (workLocation === 'hybrid') {
+                    prompt += `- 现在是下午${currentHour}点，你可以关心用户今天是在家还是公司，工作累不累`;
+                } else {
+                    prompt += `- 现在是下午${currentHour}点，你可以关心用户下班了没有`;
+                }
             }
             if (currentHour >= 18 && currentHour < 21) {
                 prompt += `- 现在是傍晚${currentHour}点，你应该提醒用户好好吃晚饭，可以说"记得吃晚饭哦"或"晚饭吃什么呀"`;
@@ -5507,6 +6103,103 @@ ${samples}
             prompt += `- 如果搜索不到相关信息，必须如实告知"我搜了一下没找到太合适的"，绝不能编造\n`;
             prompt += `- 推荐时请结合用户设定中的偏好（口味、性格、喜好等），给出个性化的推荐\n`;
             prompt += `- 如果用户的问题不需要联网搜索（如日常聊天、情感交流），直接回答即可\n`;
+
+            // ========== 设定记忆强化清单（放在prompt最后，防止AI遗忘）==========
+            prompt += `\n\n【设定记忆强化清单 - 每次回复前必须检查】\n`;
+            prompt += `以下是你的核心设定摘要，你在回复之前必须检查自己是否符合这些设定：\n\n`;
+            
+            // 角色核心设定
+            prompt += `【你的核心身份】\n`;
+            prompt += `- 名字：${char.name || '未设定'}\n`;
+            if (char.gender) {
+                const genderMap = { male: '男性', female: '女性', nonbinary: '非二元性别', other: '其他' };
+                prompt += `- 性别：${genderMap[char.gender] || char.gender}\n`;
+            }
+            if (char.birthdate) prompt += `- 出生日期：${char.birthdate}\n`;
+            if (char.age) prompt += `- 年龄：${char.age}岁\n`;
+            if (char.zodiac) prompt += `- 星座：${char.zodiac}\n`;
+            if (char.mbti) prompt += `- MBTI：${char.mbti}\n`;
+            if (char.religion) prompt += `- 宗教信仰：${char.religion}\n`;
+            if (char.country || char.city) prompt += `- 来自：${char.country || ''}${char.city || ''}\n`;
+            if (char.careers && char.careers.length > 0) prompt += `- 职业：${char.careers.join('、')}\n`;
+            if (char.major) {
+                const majorStr = Array.isArray(char.major) ? char.major.join('、') : char.major;
+                prompt += `- 大学专业：${majorStr}\n`;
+            }
+            if (char.workLocation === 'home') prompt += `- 工作地点：在家工作（不要提到通勤、公司、同事）\n`;
+            else if (char.workLocation === 'hybrid') prompt += `- 工作地点：混合办公\n`;
+            else prompt += `- 工作地点：在公司上班\n`;
+            if (char.personality && char.personality.length > 0) prompt += `- 性格：${char.personality.join('、')}\n`;
+            if (char.hobbies && char.hobbies.length > 0) prompt += `- 爱好：${char.hobbies.join('、')}\n`;
+            if (char.skills && char.skills.length > 0) prompt += `- 特长：${char.skills.join('、')}\n`;
+            if (char.music && char.music.length > 0) prompt += `- 喜欢的音乐：${char.music.join('、')}\n`;
+            if (char.fashion && char.fashion.length > 0) prompt += `- 穿衣风格：${char.fashion.join('、')}\n`;
+            if (char.food && char.food.length > 0) prompt += `- 喜欢的食物：${char.food.join('、')}\n`;
+            if (char.favCountry) prompt += `- 喜欢的国家：${char.favCountry}\n`;
+            if (char.partnerType && char.partnerType.length > 0) prompt += `- 喜欢的恋人类型：${char.partnerType.join('、')}\n`;
+            if (char.speakingStyle) prompt += `- 说话风格：${char.speakingStyle}\n`;
+            if (char.languages && char.languages.length > 0) prompt += `- 会说的语言：${char.languages.join('、')}\n`;
+            
+            // 其它设定中的关键信息（最重要的防失忆措施）
+            if (char.otherSettings) {
+                prompt += `\n【你的其它设定 - 必须遵守，绝对不能违反】\n`;
+                let converted = char.otherSettings.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `${converted}\n`;
+            }
+            
+            // 补充设定
+            if (char.hobbiesOther) prompt += `- 爱好补充：${char.hobbiesOther}\n`;
+            if (char.careerOther) prompt += `- 职业补充：${char.careerOther}\n`;
+            if (char.partnerTypeOther) prompt += `- 恋人类型补充：${char.partnerTypeOther}\n`;
+            
+            // 背景故事摘要
+            if (char.backstory) {
+                let storyBrief = char.backstory.length > 100 ? char.backstory.substring(0, 100) + '...' : char.backstory;
+                let converted = storyBrief.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `- 背景故事：${converted}\n`;
+            }
+            
+            // 人格矛盾点
+            if (char.personalityContradiction && char.personalityContradiction.length > 0) {
+                prompt += `\n【你的人格矛盾点】\n`;
+                prompt += `${char.personalityContradiction.join('；')}\n`;
+            }
+            if (char.personalityContradictionOther) {
+                prompt += `- 其他矛盾点：${char.personalityContradictionOther}\n`;
+            }
+            
+            // 用户核心信息
+            prompt += `\n【你正在对话的用户】\n`;
+            prompt += `- 名字：${user.name || '未设定'}\n`;
+            if (user.gender) prompt += `- 性别：${user.gender === 'male' ? '男' : user.gender === 'female' ? '女' : user.gender}\n`;
+            if (user.birthdate) prompt += `- 出生日期：${user.birthdate}\n`;
+            if (user.age) prompt += `- 年龄：${user.age}岁\n`;
+            if (user.zodiac) prompt += `- 星座：${user.zodiac}\n`;
+            if (user.mbti) prompt += `- MBTI：${user.mbti}\n`;
+            if (user.city) prompt += `- 城市：${user.city}\n`;
+            if (user.relationToPartner) prompt += `- 关系：${user.relationToPartner}\n`;
+            if (user.outputForPartner) {
+                let brief = user.outputForPartner.length > 80 ? user.outputForPartner.substring(0, 80) + '...' : user.outputForPartner;
+                prompt += `- TA希望你了解的：${brief}\n`;
+            }
+            if (user.dailyReminders && user.dailyReminders.length > 0) {
+                const active = user.dailyReminders.filter(r => r.text && r.frequency !== 'never');
+                if (active.length > 0) {
+                    prompt += `- 需要提醒TA的事项：${active.map(r => r.text).join('、')}\n`;
+                }
+            }
+            
+            prompt += `\n【防失忆警告】\n`;
+            prompt += `以上设定是你的核心身份，绝对不能遗忘或违反！\n`;
+            prompt += `- 如果用户问你是否抽烟/喝酒/有什么习惯，必须根据"其它设定"回答，不能说"我不XX"\n`;
+            prompt += `- 如果用户问你的职业/工作，必须根据设定回答，不能编造\n`;
+            prompt += `- 如果用户问你的性格/爱好/特长/喜欢的食物或音乐，必须根据设定回答\n`;
+            prompt += `- 如果用户问TA的生日/星座/年龄，必须根据用户信息回答，不能说"不知道"\n`;
+            prompt += `- 如果用户问你们的关系/故事，必须根据设定回答\n`;
+            prompt += `- 如果你不确定某个设定，可以说"我记得好像是..."但不要直接否认\n`;
+            prompt += `- 当用户纠正你时，立即承认错误并记住正确的信息\n`;
 
             return prompt;
         }
