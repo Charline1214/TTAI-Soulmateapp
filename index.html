@@ -4813,6 +4813,43 @@
         // 全局变量：存储上传的图片
         let uploadedImageBase64 = null;
 
+        // 图片压缩函数
+        function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.7) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // 计算缩放比例
+                        if (width > maxWidth || height > maxHeight) {
+                            const ratio = Math.min(maxWidth / width, maxHeight / height);
+                            width = width * ratio;
+                            height = height * ratio;
+                        }
+                        
+                        // 创建canvas进行压缩
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // 转换为base64，使用JPEG格式以获得更好的压缩率
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                        console.log('图片压缩完成，原大小:', e.target.result.length, '压缩后:', compressedBase64.length);
+                        resolve(compressedBase64);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
         // 处理聊天图片上传
         function handleChatImageUpload(input) {
             const file = input.files[0];
@@ -4843,24 +4880,24 @@
             
             // iOS Safari 需要延迟处理
             setTimeout(() => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedImageBase64 = e.target.result;
-                    console.log('图片读取成功，大小:', uploadedImageBase64.length);
-                    
-                    // 显示预览
-                    const previewArea = document.getElementById('imagePreviewArea');
-                    const previewImg = document.getElementById('imagePreview');
-                    previewImg.src = uploadedImageBase64;
-                    previewArea.style.display = 'block';
-                    
-                    showToast('图片已选择，点击发送');
-                };
-                reader.onerror = function(e) {
-                    console.error('图片读取失败:', e);
-                    showToast('图片读取失败，请重试');
-                };
-                reader.readAsDataURL(file);
+                // 压缩图片
+                compressImage(file, 1200, 1200, 0.7)
+                    .then(compressedBase64 => {
+                        uploadedImageBase64 = compressedBase64;
+                        console.log('图片压缩成功，最终大小:', uploadedImageBase64.length);
+                        
+                        // 显示预览
+                        const previewArea = document.getElementById('imagePreviewArea');
+                        const previewImg = document.getElementById('imagePreview');
+                        previewImg.src = uploadedImageBase64;
+                        previewArea.style.display = 'block';
+                        
+                        showToast('图片已选择，点击发送');
+                    })
+                    .catch(error => {
+                        console.error('图片压缩失败:', error);
+                        showToast('图片处理失败，请重试');
+                    });
             }, 100);
             
             // 不清空input，iOS需要保留以支持重复选择
@@ -6025,7 +6062,14 @@ ${samples}
                     prompt += `| 粤语口语 | 禁止说 |\n`;
                     prompt += `| 我哋 | 我们 |\n`;
                     prompt += `| 你哋 | 你们 |\n`;
+                    prompt += `| 佢哋 | 他们 |\n`;
+                    prompt += `| 今日 | 今天 |\n`;
+                    prompt += `| 聽日 | 明天 |\n`;
+                    prompt += `| 尋日 | 昨天 |\n`;
+                    prompt += `| 而家 | 现在 |\n`;
+                    prompt += `| 一齐 | 一起 |\n`;
                     prompt += `| 喺度/喺呢度 | 在这里 |\n`;
+                    prompt += `| 喺嗰度 | 在那里 |\n`;
                     prompt += `| 去边/去边度 | 去哪里 |\n`;
                     prompt += `| 做咩 | 干什么 |\n`;
                     prompt += `| 点算 | 怎么办 |\n`;
@@ -6056,7 +6100,138 @@ ${samples}
                     prompt += `| 好多 | 很多 |\n`;
                     prompt += `| 少少 | 一点点 |\n`;
                     prompt += `| 埋嚟 | 过来 |\n`;
-                    prompt += `| 埋去 | 过去 |\n\n`;
+                    prompt += `| 埋去 | 过去 |\n`;
+                    prompt += `| 点解 | 为什么 |\n`;
+                    prompt += `| 乜嘢/咩 | 什么 |\n`;
+                    prompt += `| 边度 | 哪里 |\n`;
+                    prompt += `| 边个 | 谁 |\n`;
+                    prompt += `| 系 | 是 |\n`;
+                    prompt += `| 唔系 | 不是 |\n`;
+                    prompt += `| 得唔得 | 行不行/可以吗 |\n`;
+                    prompt += `| 有冇 | 有没有 |\n`;
+                    prompt += `| 几耐 | 多久 |\n`;
+                    prompt += `| 几钱 | 多少钱 |\n`;
+                    prompt += `| 睇 | 看 |\n`;
+                    prompt += `| 食 | 吃 |\n`;
+                    prompt += `| 饮 | 喝 |\n`;
+                    prompt += `| 讲 | 说 |\n`;
+                    prompt += `| 听日 | 明天 |\n`;
+                    prompt += `| 琴日 | 昨天 |\n`;
+                    prompt += `| 晏昼 | 下午 |\n`;
+                    prompt += `| 夜晚 | 晚上 |\n`;
+                    prompt += `| 朝早 | 早上 |\n`;
+                    prompt += `| 头先 | 刚才 |\n`;
+                    prompt += `| 一阵 | 等一下 |\n`;
+                    prompt += `| 好耐 | 很久 |\n`;
+                    prompt += `| 好快 | 很快 |\n`;
+                    prompt += `| 好慢 | 很慢 |\n`;
+                    prompt += `| 好冻 | 很冷 |\n`;
+                    prompt += `| 好热 | 很热 |\n`;
+                    prompt += `| 好攰 | 很累 |\n`;
+                    prompt += `| 好开心 | 很高兴 |\n`;
+                    prompt += `| 好唔开心 | 很不高兴 |\n`;
+                    prompt += `| 嬲 | 生气 |\n`;
+                    prompt += `| 惊 | 害怕 |\n`;
+                    prompt += `| 挂住 | 想念 |\n`;
+                    prompt += `| 锡 | 疼爱/亲亲 |\n`;
+                    prompt += `| 钟意 | 喜欢 |\n`;
+                    prompt += `| 憎 | 讨厌 |\n`;
+                    prompt += `| 知道 | 知道 |\n`;
+                    prompt += `| 唔知 | 不知道 |\n`;
+                    prompt += `| 记得 | 记得 |\n`;
+                    prompt += `| 唔记得 | 不记得 |\n`;
+                    prompt += `| 识 | 会/认识 |\n`;
+                    prompt += `| 唔识 | 不会/不认识 |\n`;
+                    prompt += `| 可以 | 可以 |\n`;
+                    prompt += `| 唔可以 | 不可以 |\n`;
+                    prompt += `| 要 | 要 |\n`;
+                    prompt += `| 唔要 | 不要 |\n`;
+                    prompt += `| 去 | 去 |\n`;
+                    prompt += `| 唔去 | 不去 |\n`;
+                    prompt += `| 嚟 | 来 |\n`;
+                    prompt += `| 唔嚟 | 不来 |\n`;
+                    prompt += `| 走 | 走 |\n`;
+                    prompt += `| 唔好走 | 别走 |\n`;
+                    prompt += `| 等 | 等 |\n`;
+                    prompt += `| 唔好等 | 别等 |\n`;
+                    prompt += `| 快啲 | 快点 |\n`;
+                    prompt += `| 慢啲 | 慢点 |\n`;
+                    prompt += `| 小心 | 小心 |\n`;
+                    prompt += `| 唔该 | 谢谢/请 |\n`;
+                    prompt += `| 对唔住 | 对不起 |\n`;
+                    prompt += `| 唔紧要 | 没关系 |\n`;
+                    prompt += `| 恭喜 | 恭喜 |\n`;
+                    prompt += `| 再见 | 再见 |\n`;
+                    prompt += `| 拜拜 | 拜拜 |\n`;
+
+                    prompt += `\n【强制词汇替换规则 - 必须严格执行】\n`;
+                    prompt += `在生成回复前，你必须逐词检查并替换以下词汇：\n`;
+                    prompt += `1. "今天" → 必须换成 "今日"\n`;
+                    prompt += `2. "明天" → 必须换成 "聽日/听日"\n`;
+                    prompt += `3. "昨天" → 必须换成 "尋日/琴日"\n`;
+                    prompt += `4. "一起" → 必须换成 "一齐"\n`;
+                    prompt += `5. "和" / "跟" → 必须换成 "同"\n`;
+                    prompt += `6. "的" → 必须换成 "嘅"\n`;
+                    prompt += `7. "了" → 必须换成 "咗"\n`;
+                    prompt += `8. "在" → 必须换成 "喺"\n`;
+                    prompt += `9. "给" → 必须换成 "畀"\n`;
+                    prompt += `10. "来" → 必须换成 "嚟"\n`;
+                    prompt += `11. "去" → 保持 "去"\n`;
+                    prompt += `12. "是" → 必须换成 "系"\n`;
+                    prompt += `13. "不是" → 必须换成 "唔系"\n`;
+                    prompt += `14. "没有" → 必须换成 "冇"\n`;
+                    prompt += `15. "什么" → 必须换成 "乜嘢/咩"\n`;
+                    prompt += `16. "为什么" → 必须换成 "点解"\n`;
+                    prompt += `17. "哪里" → 必须换成 "边度"\n`;
+                    prompt += `18. "谁" → 必须换成 "边个"\n`;
+                    prompt += `19. "多少" / "多少钱" → 必须换成 "几多/几钱"\n`;
+                    prompt += `20. "看" → 必须换成 "睇"\n`;
+                    prompt += `21. "吃" → 必须换成 "食"\n`;
+                    prompt += `22. "喝" → 必须换成 "饮"\n`;
+                    prompt += `23. "说" → 必须换成 "讲"\n`;
+                    prompt += `24. "睡觉" → 必须换成 "瞓觉"\n`;
+                    prompt += `25. "上班" → 必须换成 "返工"\n`;
+                    prompt += `26. "下班" → 必须换成 "放工"\n`;
+                    prompt += `27. "回家" → 必须换成 "返屋企"\n`;
+                    prompt += `28. "我们" → 必须换成 "我哋"\n`;
+                    prompt += `29. "你们" → 必须换成 "你哋"\n`;
+                    prompt += `30. "他们" → 必须换成 "佢哋"\n`;
+                    prompt += `31. "这个" → 必须换成 "呢个"\n`;
+                    prompt += `32. "那个" → 必须换成 "嗰个"\n`;
+                    prompt += `33. "这里" → 必须换成 "喺度/呢度"\n`;
+                    prompt += `34. "那里" → 必须换成 "嗰度"\n`;
+                    prompt += `35. "现在" → 必须换成 "而家"\n`;
+                    prompt += `36. "刚才" → 必须换成 "头先"\n`;
+                    prompt += `37. "等一下" → 必须换成 "一阵"\n`;
+                    prompt += `38. "很久" → 必须换成 "好耐"\n`;
+                    prompt += `39. "很累" → 必须换成 "好攰"\n`;
+                    prompt += `40. "想念" → 必须换成 "挂住"\n`;
+                    prompt += `41. "喜欢" → 必须换成 "钟意"\n`;
+                    prompt += `42. "讨厌" → 必须换成 "憎"\n`;
+                    prompt += `43. "生气" → 必须换成 "嬲"\n`;
+                    prompt += `44. "害怕" → 必须换成 "惊"\n`;
+                    prompt += `45. "不知道" → 必须换成 "唔知"\n`;
+                    prompt += `46. "记得" → 保持 "记得"\n`;
+                    prompt += `47. "不记得" → 必须换成 "唔记得"\n`;
+                    prompt += `48. "可以" → 保持 "可以" 或 "得"\n`;
+                    prompt += `49. "不可以" → 必须换成 "唔可以/唔得"\n`;
+                    prompt += `50. "谢谢" → 必须换成 "唔该/多谢"\n`;
+                    prompt += `51. "对不起" → 必须换成 "对唔住"\n`;
+                    prompt += `52. "没关系" → 必须换成 "冇所谓/唔紧要"\n`;
+
+                    prompt += `\n【自我检查机制 - 生成回复后必须执行】\n`;
+                    prompt += `生成回复后，你必须检查自己的回复，确保：\n`;
+                    prompt += `1. 没有出现"今天""明天""昨天"，必须是"今日""聽日""尋日"\n`;
+                    prompt += `2. 没有出现"一起"，必须是"一齐"\n`;
+                    prompt += `3. 没有出现"和""跟"（连接词），必须是"同"\n`;
+                    prompt += `4. 没有出现"的"，必须是"嘅"\n`;
+                    prompt += `5. 没有出现"了"，必须是"咗"\n`;
+                    prompt += `6. 没有出现"在"（介词），必须是"喺"\n`;
+                    prompt += `7. 没有出现"说"，必须是"讲"\n`;
+                    prompt += `8. 没有出现"看"，必须是"睇"\n`;
+                    prompt += `9. 没有出现"吃"，必须是"食"\n`;
+                    prompt += `10. 没有出现"睡觉"，必须是"瞓觉"\n`;
+                    prompt += `如果发现用了普通话词汇，必须立即重新生成回复！\n\n`;
                     prompt += `【地道粤语口语例句 - 模仿这些说话方式】\n`;
                     prompt += `日常：\n`;
                     prompt += `  * "喂，做咩啊？"\n`;
