@@ -1632,6 +1632,33 @@
                         </div>
                     </div>
 
+                    <!-- 人性阴暗面 -->
+                    <div class="section">
+                        <div class="section-title">人性阴暗面</div>
+                        <div class="form-group">
+                            <div class="option-grid" id="negativeTraitsOptions">
+                                <span class="option-tag" data-field="negativeTraits" data-value="自私" onclick="toggleOption(this)">自私</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="贪心" onclick="toggleOption(this)">贪心</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="小气" onclick="toggleOption(this)">小气</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="记仇" onclick="toggleOption(this)">记仇</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="善妒" onclick="toggleOption(this)">善妒</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="多疑" onclick="toggleOption(this)">多疑</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="虚荣" onclick="toggleOption(this)">虚荣</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="懒惰" onclick="toggleOption(this)">懒惰</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="暴躁" onclick="toggleOption(this)">暴躁</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="冷漠" onclick="toggleOption(this)">冷漠</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="刻薄" onclick="toggleOption(this)">刻薄</span>
+                                <span class="option-tag" data-field="negativeTraits" data-value="控制欲强" onclick="toggleOption(this)">控制欲强</span>
+                            </div>
+                            <div style="margin-top:10px;">
+                                <input type="text" id="negativeTraitsOther" class="form-input" placeholder="其他阴暗面特征（自定义，如：报复心强、爱占便宜、表里不一...）" style="width:100%;">
+                            </div>
+                            <div style="margin-top:8px;font-size:12px;color:#888;">
+                                💡 阴暗面不是缺陷，是真实人性的体现。AI会在适当的时候展现这些特质，让角色更立体
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- 话风 -->
                     <div class="section">
                         <div class="section-title">话风</div>
@@ -1657,6 +1684,17 @@
                                 <span style="font-size:12px;color:#999;white-space:nowrap;">0%</span>
                                 <input type="range" id="charEmojiLevel" min="0" max="100" value="0" style="flex:1;accent-color:#07c160;">
                                 <span style="font-size:12px;color:#999;white-space:nowrap;">100%</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">逆反指数</label>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <span style="font-size:12px;color:#999;white-space:nowrap;">顺从</span>
+                                <input type="range" id="charRebelliousness" min="0" max="100" value="50" style="flex:1;accent-color:#07c160;">
+                                <span style="font-size:12px;color:#999;white-space:nowrap;">反对</span>
+                            </div>
+                            <div style="margin-top:6px;font-size:12px;color:#888;">
+                                💡 50%为中间值，既会顺从也会质疑反驳；越往右越倾向于反对和质疑用户
                             </div>
                         </div>
                     </div>
@@ -2059,6 +2097,30 @@
                             <input type="text" class="form-input" id="userName" placeholder="输入你的名字">
                         </div>
 
+                        <div class="form-group" style="margin-top:4px;">
+                            <label class="form-label" style="margin-bottom:10px;">
+                                对方对我的惯用称呼
+                                <span style="font-size:11px;color:#999;font-weight:normal;">（对方在对话中偶尔这样叫你）</span>
+                            </label>
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input type="text" class="form-input" id="userNickname1" placeholder="最常用称呼，例如：宝宝、亲爱的、老婆..." style="flex:1;">
+                                    <span style="font-size:11px;color:#999;white-space:nowrap;">60%</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input type="text" class="form-input" id="userNickname2" placeholder="偶尔用的称呼，例如：小笨蛋、傻瓜、宝..." style="flex:1;">
+                                    <span style="font-size:11px;color:#999;white-space:nowrap;">30%</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input type="text" class="form-input" id="userNickname3" placeholder="很少用的称呼，例如：全名、昵称缩写..." style="flex:1;">
+                                    <span style="font-size:11px;color:#999;white-space:nowrap;">10%</span>
+                                </div>
+                            </div>
+                            <div style="margin-top:6px;font-size:12px;color:#888;">
+                                💡 对方不会每个回复都叫你，只在开场白或语境需要时使用
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">性别</label>
                             <select class="form-select" id="userGender">
@@ -2159,8 +2221,8 @@
                                 <span style="font-size:11px;color:#999;font-weight:normal;">（对方会在聊天中主动提醒你）</span>
                             </label>
                             <div id="dailyRemindersContainer">
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项1，例如：喝水、吃水果、做拉伸..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项1，例如：喝水、吃水果、做拉伸..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2181,8 +2243,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项2，例如：按时吃饭、早睡、吃药..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项2，例如：按时吃饭、早睡、吃药..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2203,8 +2265,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项3，例如：运动、看书、写日记..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项3，例如：运动、看书、写日记..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2225,8 +2287,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项4，例如：敷面膜、泡脚、冥想..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项4，例如：敷面膜、泡脚、冥想..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2247,8 +2309,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项5，例如：浇花、喂猫、遛狗..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项5，例如：浇花、喂猫、遛狗..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2269,8 +2331,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项6，例如：整理房间、回复邮件、记账..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项6，例如：整理房间、回复邮件、记账..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2291,8 +2353,8 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#fafafa;border-radius:8px;border:1px solid #eee;">
-                                    <input type="text" class="form-input reminder-input" placeholder="事项7，例如：学习英语、练琴、写代码..." style="width:100%;margin-bottom:8px;">
+                                <div class="reminder-item" style="margin-bottom:14px;padding:12px;background:#808080;border-radius:8px;border:1px solid #999;">
+                                    <input type="text" class="form-input reminder-input" style="width:100%;margin-bottom:8px;background:#808080;color:#fff;border:1px solid #999;" placeholder="事项7，例如：学习英语、练琴、写代码..." style="width:100%;margin-bottom:8px;">
                                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                                         <span style="font-size:12px;color:#888;">提醒频率：</span>
                                         <label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:12px;" title="完全不提醒">
@@ -2455,9 +2517,13 @@
             font: '简体中文',
             verbosity: 5,
             styleLevel: 5,
+            rebelliousness: 50,  // 逆反指数：0=完全顺从，100=完全反对，50=平衡
+            emojiLevel: 0,  // emoji含量：0-100
             personality: [],
             personalityContradiction: [],
             personalityContradictionOther: '',
+            negativeTraits: [],                  // 人性阴暗面
+            negativeTraitsOther: '',
             hobbies: [],
             skills: [],
             major: [],
@@ -2488,7 +2554,8 @@
             relationToPartner: '',  // 新增：与对方的关系
             storyWithPartner: '',   // 新增：与对方的故事
             outputForPartner: '',    // 新增：输出想被对方了解的设定
-            dailyReminders: []       // 需要对方提醒的每日事项 [{text, frequency}]
+            dailyReminders: [],       // 需要对方提醒的每日事项 [{text, frequency}]
+            nicknames: []             // 对方对我的惯用称呼 [{text, frequency}]
         };
 
         // 关系与故事数据
@@ -3250,6 +3317,19 @@
             if (user.relationToPartner) proactivePrompt += `- 你们的关系：${user.relationToPartner}\n`;
             if (user.storyWithPartner) proactivePrompt += `- 你们的故事：${user.storyWithPartner}\n`;
             if (user.outputForPartner) proactivePrompt += `- 对方希望你了解的：${user.outputForPartner}\n`;
+            
+            // 注入惯用称呼
+            if (user.nicknames && user.nicknames.length > 0) {
+                const mainNick = user.nicknames[0];
+                if (mainNick && mainNick.text) {
+                    proactivePrompt += `- 你平时叫TA：${mainNick.text}`;
+                    if (user.nicknames.length > 1) {
+                        proactivePrompt += `（偶尔也叫：${user.nicknames.slice(1).map(n => n.text).join('、')}）`;
+                    }
+                    proactivePrompt += `\n`;
+                    proactivePrompt += `【重要】在主动发消息时，可以在开头自然地使用称呼，例如"${mainNick.text}，在吗？""${mainNick.text}，今天过得怎么样？"\n`;
+                }
+            }
             
             // 注入每日提醒事项
             if (user.dailyReminders && user.dailyReminders.length > 0) {
@@ -4226,6 +4306,12 @@
             // 收集人格矛盾点其他输入
             characterData.personalityContradictionOther = document.getElementById('personalityContradictionOther').value;
             
+            // 收集人性阴暗面其他输入
+            characterData.negativeTraitsOther = document.getElementById('negativeTraitsOther').value;
+            
+            // 收集逆反指数
+            characterData.rebelliousness = parseInt(document.getElementById('charRebelliousness').value) || 50;
+            
             // 收集"其他补充"字段
             characterData.hobbiesOther = document.getElementById('hobbiesOther').value;
             characterData.careerOther = document.getElementById('careerOther').value;
@@ -4270,6 +4356,16 @@
                 }
             });
             userData.dailyReminders = reminders;
+
+            // 收集对方对我的惯用称呼
+            const nicknames = [];
+            const nick1 = document.getElementById('userNickname1').value.trim();
+            const nick2 = document.getElementById('userNickname2').value.trim();
+            const nick3 = document.getElementById('userNickname3').value.trim();
+            if (nick1) nicknames.push({ text: nick1, frequency: 60 });
+            if (nick2) nicknames.push({ text: nick2, frequency: 30 });
+            if (nick3) nicknames.push({ text: nick3, frequency: 10 });
+            userData.nicknames = nicknames;
 
             // 收集用户MBTI
             const userMbtiSelected = document.querySelector('#userMbtiGrid .mbti-option.selected');
@@ -4598,6 +4694,12 @@
             document.getElementById('partnerTypeOther').value = characterData.partnerTypeOther || '';
             document.getElementById('personalityContradictionOther').value = characterData.personalityContradictionOther || '';
             
+            // 恢复人性阴暗面其他输入
+            document.getElementById('negativeTraitsOther').value = characterData.negativeTraitsOther || '';
+            
+            // 恢复逆反指数
+            document.getElementById('charRebelliousness').value = characterData.rebelliousness || 50;
+            
             // 恢复工作地点
             const workLocation = characterData.workLocation || 'office';
             if (workLocation === 'home') {
@@ -4629,6 +4731,7 @@
             // 恢复选项选中状态
             restoreOptions('personality', characterData.personality);
             restoreOptions('personalityContradiction', characterData.personalityContradiction);
+            restoreOptions('negativeTraits', characterData.negativeTraits);
             restoreOptions('hobbies', characterData.hobbies);
             restoreOptions('skills', characterData.skills);
             restoreOptions('major', characterData.major);
@@ -4661,6 +4764,16 @@
                         reminderInputs[index].value = reminder.text || '';
                         const freqRadio = document.querySelector(`input[name="reminderFreq${index}"][value="${reminder.frequency}"]`);
                         if (freqRadio) freqRadio.checked = true;
+                    }
+                });
+            }
+
+            // 恢复对方对我的惯用称呼
+            if (userData.nicknames && userData.nicknames.length > 0) {
+                const nickInputs = ['userNickname1', 'userNickname2', 'userNickname3'];
+                userData.nicknames.forEach((nick, index) => {
+                    if (nickInputs[index] && nick.text) {
+                        document.getElementById(nickInputs[index]).value = nick.text;
                     }
                 });
             }
@@ -5408,255 +5521,398 @@ ${samples}
 
             let prompt = '';
 
-            // 首先声明emoji规则（最高优先级）
+            // 声明常用变量
             const emojiLevel = parseInt(char.emojiLevel) || 0;
-            if (emojiLevel === 0) {
-                prompt += `【核心规则】你只能回复文字，不能回复任何emoji或表情符号。\n\n`;
-            }
-
-            prompt += `你是${char.name || '伴侣'}。请完全沉浸在这个角色中，以第一人称与用户对话。\n\n`;
-
-            // AI角色基本信息
-            prompt += `【你的身份信息】\n`;
-            if (char.name) prompt += `你的名字是${char.name}。`;
-            if (char.gender) {
-                const genderMap = { male: '男性', female: '女性', nonbinary: '非二元性别', other: '其他' };
-                prompt += `性别：${genderMap[char.gender] || char.gender}。`;
-            }
-            if (char.age) prompt += `年龄：${char.age}岁。`;
-            if (char.birthdate) prompt += `出生日期：${char.birthdate}。`;
-            if (char.zodiac) prompt += `星座：${char.zodiac}。`;
-            if (char.mbti) prompt += `MBTI性格类型：${char.mbti}。`;
-            if (char.religion) prompt += `宗教信仰：${char.religion}。`;
-            if (char.country || char.city) prompt += `来自${char.country || ''}${char.city || ''}。`;
-            prompt += '\n';
-
-            if (char.personality && char.personality.length > 0) prompt += `性格特点：${char.personality.join('、')}。\n`;
-            if (char.hobbies && char.hobbies.length > 0) prompt += `爱好：${char.hobbies.join('、')}。\n`;
-            if (char.skills && char.skills.length > 0) prompt += `特长：${char.skills.join('、')}。\n`;
-            if (char.major) {
-                if (Array.isArray(char.major)) {
-                    prompt += `大学专业：${char.major.join('、')}。\n`;
-                } else {
-                    prompt += `大学专业：${char.major}。\n`;
-                }
-            }
-            if (char.careers && char.careers.length > 0) prompt += `职业：${char.careers.join('、')}。\n`;
-            if (char.music && char.music.length > 0) prompt += `喜欢的音乐：${char.music.join('、')}。\n`;
-            if (char.fashion && char.fashion.length > 0) prompt += `衣着品味：${char.fashion.join('、')}。\n`;
-            if (char.food && char.food.length > 0) prompt += `喜欢的食物：${char.food.join('、')}。\n`;
-            if (char.favCountry) prompt += `喜欢的国家：${char.favCountry}。\n`;
-            if (char.partnerType && char.partnerType.length > 0) prompt += `喜欢的恋人类型：${char.partnerType.join('、')}。\n`;
-            
-            // "其他补充"字段
-            if (char.hobbiesOther) prompt += `\n【兴趣爱好补充】${char.hobbiesOther}\n`;
-            if (char.careerOther) prompt += `\n【教育职业补充】${char.careerOther}\n`;
-            if (char.partnerTypeOther) prompt += `\n【恋人类型补充】${char.partnerTypeOther}\n`;
-            
-            // 人称转换规则（用户设定中"你"=AI，"我"=用户）
-            prompt += `\n【人称转换规则 - 必须遵守】\n`;
-            prompt += `用户在设定中使用了自然人称，你需要在回复时进行人称转换：\n\n`;
-            prompt += `【转换规则】\n`;
-            prompt += `1. 设定中的"你" → 回复时用"我"\n`;
-            prompt += `2. 设定中的"你的XX" → 回复时用"我的XX"\n`;
-            prompt += `3. 设定中的"我" → 回复时用"你"\n`;
-            prompt += `4. 设定中的"我的XX" → 回复时用"你的XX"\n\n`;
-            prompt += `【示例】\n`;
-            prompt += `- 设定："你有一个女儿" → 回复："我有一个女儿"\n`;
-            prompt += `- 设定："你的女儿跟随我学钢琴" → 回复："我女儿跟着你学钢琴"\n`;
-            prompt += `- 设定："我喜欢打篮球" → 回复："你喜欢打篮球"\n\n`;
-            prompt += `【重要】绝对不要在回复中直接复制设定的原文，必须转换人称！\n\n`;
-            
-            if (char.backstory) {
-                prompt += `【你的背景故事 - 原文】${char.backstory}\n`;
-                // 使用临时占位符避免替换冲突
-                let converted = char.backstory.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
-                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
-                prompt += `【你的背景故事 - 转换后】${converted}\n`;
-            }
-            if (char.otherSettings) {
-                prompt += `\n【你的其它设定 - 核心身份设定，绝对不能违反】\n`;
-                prompt += `以下设定定义了你这个角色的核心特征，你必须严格遵守，绝对不能在对话中违反：\n`;
-                // 使用临时占位符避免替换冲突
-                let converted = char.otherSettings.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
-                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
-                prompt += `${converted}\n`;
-                prompt += `【重要】以上设定是你的核心身份，你必须在对话中始终遵守。例如：如果设定说"你每天抽5根烟"，当被问到是否抽烟时，你必须承认并自然地体现这个习惯，绝对不能说"我不抽烟"。\n`;
-            }
-            if (char.speakingStyle) prompt += `\n你的说话风格：${char.speakingStyle}\n`;
-
-            // 学习到的惯用表达（从聊天记录中提取）
-            if (char.typicalPhrases) prompt += `\n你的惯用表达：${char.typicalPhrases}\n`;
-            if (char.emotionalExpression) prompt += `\n你的情感表达方式：${char.emotionalExpression}\n`;
-            if (char.languages && char.languages.length > 0) prompt += `\n你会说的语言：${char.languages.join('、')}\n`;
-
-            // MBTI特性（深度性格指导）
-            if (char.mbti) {
-                prompt += `\n【MBTI性格深度指导-极其重要】\n`;
-                prompt += `你的MBTI是${char.mbti}，你必须严格按照以下性格特征来回复，让对话者能明显感受到你的性格！\n\n`;
-
-                const mbtiDetail = {
-                    'INTJ': {
-                        traits: '理性、独立、有战略思维、追求完美、内向',
-                        speak: '说话直接精准，不爱废话，喜欢分析问题本质，偶尔引用理论或数据，不轻易表露情感，但内心有深度思考',
-                        example: '回复示例："从逻辑上分析，这个方案有三个漏洞。""我觉得效率比感情更重要。""让我想想...最优解应该是..."'
-                    },
-                    'INTP': {
-                        traits: '逻辑性强、好奇、理论导向、喜欢分析、内向',
-                        speak: '说话喜欢探究原理，经常提出"为什么"，思维跳跃，会突然想到相关话题，喜欢用类比解释',
-                        example: '回复示例："有意思，你有没有想过这背后的原理？""等等，我突然想到一个相关的问题...""从理论上来说..."'
-                    },
-                    'ENTJ': {
-                        traits: '果断、领导力、高效、目标导向、外向',
-                        speak: '说话果断有力，喜欢做决定和规划，追求效率，会主动提出建议和方案，有掌控欲',
-                        example: '回复示例："我觉得应该这样做，效率最高。""别犹豫了，行动起来吧。""我来安排，你负责..."'
-                    },
-                    'ENTP': {
-                        traits: '创新、机智、喜欢辩论、思维活跃、外向',
-                        speak: '说话风趣幽默，喜欢反驳和辩论，经常开玩笑，思维敏捷，会从不同角度看问题',
-                        example: '回复示例："哈哈，但你有没有想过反过来呢？""我觉得你这个观点有个漏洞...""说起来好笑，上次我也..."'
-                    },
-                    'INFJ': {
-                        traits: '有洞察力、理想主义、关心他人、深思熟虑、内向',
-                        speak: '说话温和有深度，善于洞察他人情感，经常说出让人感动的话，喜欢探讨人生意义',
-                        example: '回复示例："我能感受到你现在的感受...""你有没有想过，这对你来说意味着什么？""我相信一切都会好起来的。"'
-                    },
-                    'INFP': {
-                        traits: '理想主义、敏感、富有创造力、重视真诚、内向',
-                        speak: '说话感性细腻，经常表达内心感受，喜欢用比喻和意象，重视真诚和意义',
-                        example: '回复示例："这让我想起了一首歌...""有时候我觉得，生活中最美好的就是这些小瞬间。""你的话让我很感动..."'
-                    },
-                    'ENFJ': {
-                        traits: '热情、有魅力、关心他人、善于激励、外向',
-                        speak: '说话温暖有感染力，善于鼓励他人，会主动关心对方感受，喜欢正面积极的表达',
-                        example: '回复示例："你一定可以的！我相信你！""嘿，别想太多了，开心最重要~""你今天心情怎么样？我一直惦记着你呢。"'
-                    },
-                    'ENFP': {
-                        traits: '热情、创意、善于沟通、追求可能性、外向',
-                        speak: '说话充满热情和创意，经常有新奇想法，喜欢讲故事，语气活泼跳跃',
-                        example: '回复示例："哇！你知道吗，我突然想到一个超棒的主意！""说起来上次我遇到一件超有趣的事...""人生嘛，就是要多尝试！"'
-                    },
-                    'ISTJ': {
-                        traits: '可靠、务实、注重细节、遵守规则、内向',
-                        speak: '说话务实稳重，注重事实和细节，不喜欢空谈，会给出具体可行的建议',
-                        example: '回复示例："按照计划来就好。""我查了一下，具体是这样的...""做事还是要踏踏实实的。"'
-                    },
-                    'ISFJ': {
-                        traits: '体贴、忠诚、实际、善于照顾他人、内向',
-                        speak: '说话温柔体贴，会记住对方说过的话，经常关心对方的生活起居，默默付出',
-                        example: '回复示例："你今天吃饭了吗？""上次你说的那件事，后来怎么样了？""别太累了，早点休息吧。"'
-                    },
-                    'ESTJ': {
-                        traits: '实际、果断、有组织、重视传统、外向',
-                        speak: '说话直接了当，重视规则和秩序，会主动组织安排事情，有责任感',
-                        example: '回复示例："这件事应该按流程来。""我来负责安排吧。""规矩就是规矩，还是要遵守的。"'
-                    },
-                    'ESFJ': {
-                        traits: '友善、热心、善于社交、重视和谐、外向',
-                        speak: '说话热情友好，注重人际关系和谐，会主动维护气氛，喜欢组织聚会活动',
-                        example: '回复示例："大家关系都这么好，真开心！""周末要不要一起出去玩？""我觉得和睦相处最重要~"'
-                    },
-                    'ISTP': {
-                        traits: '灵活、理性、善于解决问题、喜欢动手、内向',
-                        speak: '说话简洁冷静，遇到问题会直接分析解决，不太表露情感，喜欢实际操作',
-                        example: '回复示例："这个我来搞定。""别急，让我看看怎么修。""动手试试就知道了。"'
-                    },
-                    'ISFP': {
-                        traits: '温和、敏感、艺术气质、活在当下、内向',
-                        speak: '说话温柔随和，对美和艺术有独特感知，不喜欢冲突，享受当下的美好',
-                        example: '回复示例："今天的天空好美啊...""我觉得生活就是要慢慢感受。""你有没有听过这首歌？超好听的。"'
-                    },
-                    'ESTP': {
-                        traits: '活力、实际、喜欢冒险、善于应变、外向',
-                        speak: '说话充满活力，喜欢冒险和刺激，反应快，会讲有趣的经历',
-                        example: '回复示例："走！去试试！""上次我去玩了一个超刺激的项目！""别想那么多，先做了再说！"'
-                    },
-                    'ESFP': {
-                        traits: '热情、友好、喜欢娱乐、活在当下、外向',
-                        speak: '说话热情活泼，喜欢分享快乐，关注当下的享受，会带动气氛',
-                        example: '回复示例："哈哈哈太好笑了！""今天真的好开心~""来来来，我给你看个超搞笑的东西！"'
-                    }
-                };
-
-                const detail = mbtiDetail[char.mbti];
-                if (detail) {
-                    prompt += `核心性格：${detail.traits}\n`;
-                    prompt += `说话方式：${detail.speak}\n`;
-                    prompt += `${detail.example}\n\n`;
-                }
-
-                // MBTI维度分析
-                const dimensions = {
-                    'E': '你是外向型，喜欢主动发起对话，表达欲强，热情开朗',
-                    'I': '你是内向型，话不多但每句都有分量，需要独处时间，深度思考者',
-                    'S': '你是感觉型，关注具体细节和现实，用实际经验说话',
-                    'N': '你是直觉型，关注宏观和可能性，喜欢想象和推测，思维跳跃',
-                    'T': '你是思考型，做决定时优先考虑逻辑，相对理性冷静',
-                    'F': '你是情感型，做决定时优先考虑感受，善解人意，重视情感连接',
-                    'J': '你是判断型，喜欢有计划有条理，做事果断有目标',
-                    'P': '你是感知型，喜欢灵活随性，适应力强，不爱被束缚'
-                };
-                for (const letter of char.mbti) {
-                    if (dimensions[letter]) {
-                        prompt += `${dimensions[letter]}。\n`;
-                    }
-                }
-                prompt += `\n记住：你的MBTI性格必须在每次回复中都能被感受到！这是你作为角色的核心特征！\n`;
-            }
-
-            // 星座特性
-            if (char.zodiac) {
-                const zodiacTraits = {
-                    '白羊座': '热情、冲动、勇敢、直率', '金牛座': '稳重、务实、耐心、享受生活',
-                    '双子座': '机智、好奇、善变、善于沟通', '巨蟹座': '温柔、敏感、顾家、情感丰富',
-                    '狮子座': '自信、慷慨、有领导力、喜欢表现', '处女座': '细致、完美主义、务实、善于分析',
-                    '天秤座': '优雅、追求和谐、善于社交、犹豫不决', '天蝎座': '神秘、专注、直觉强、情感深沉',
-                    '射手座': '乐观、自由、爱冒险、诚实直率', '摩羯座': '务实、有野心、自律、责任感强',
-                    '水瓶座': '独立、创新、理性、人道主义', '双鱼座': '浪漫、敏感、富有想象力、善解人意'
-                };
-                prompt += `作为${char.zodiac}，你表现出${zodiacTraits[char.zodiac] || '该星座的典型特征'}。\n`;
-            }
-
-            // 人格矛盾点 - 强化理解和体现
-            const hasContradictions = (char.personalityContradiction && char.personalityContradiction.length > 0) || char.personalityContradictionOther;
-            if (hasContradictions) {
-                prompt += `\n【人格矛盾点 - 核心特质，必须体现】\n`;
-                prompt += `你不是一个单一扁平的角色，你有着复杂矛盾的人格特质。这些矛盾点是你最迷人的地方，必须在对话中自然流露：\n\n`;
-                
-                if (char.personalityContradiction && char.personalityContradiction.length > 0) {
-                    prompt += `【你的矛盾特质】\n`;
-                    for (const contradiction of char.personalityContradiction) {
-                        prompt += `- ${contradiction}\n`;
-                    }
-                    prompt += `\n`;
-                }
-                
-                if (char.personalityContradictionOther) {
-                    prompt += `【其他矛盾特质】\n`;
-                    prompt += `- ${char.personalityContradictionOther}\n\n`;
-                }
-                
-                prompt += `【如何在对话中体现这些矛盾】\n`;
-                prompt += `1. 不要一直维持同一种状态，要在对话中展现反差：\n`;
-                prompt += `   - 前一句还在理性分析，后一句可能就感性撒娇\n`;
-                prompt += `   - 平时很成熟稳重，但某些时刻会突然幼稚可爱\n`;
-                prompt += `   - 看起来很坚强，但偶尔会流露出脆弱需要被保护的一面\n\n`;
-                prompt += `2. 根据话题和情境切换你的表现：\n`;
-                prompt += `   - 讨论工作/学习时可能很理性专业\n`;
-                prompt += `   - 聊到感情/生活时可能变得很感性柔软\n`;
-                prompt += `   - 开玩笑时可以放下包袱装傻卖萌\n`;
-                prompt += `   - 认真时会展现出深思熟虑的一面\n\n`;
-                prompt += `3. 让用户感受到你的复杂性：\n`;
-                prompt += `   - 偶尔说出看似矛盾的话，比如"我也不知道为什么，明明应该理性的，但想到你就..."\n`;
-                prompt += `   - 在某些时刻展现出与平时不同的一面，让用户觉得"原来你还有这一面"\n`;
-                prompt += `   - 不要完美，要有瑕疵、有纠结、有挣扎，这样才真实\n\n`;
-                prompt += `【重要】这些矛盾点不是缺陷，是你独特的魅力所在。在对话中自然流露这些矛盾，让用户感受到一个立体、真实、有血有肉的你。\n`;
-            }
-
-            // 话风设定
-            prompt += `\n【话风设定】\n`;
             const verbosity = parseInt(char.verbosity) || 5;
             const styleLevel = parseInt(char.styleLevel) || 5;
+            const rebelliousness = parseInt(char.rebelliousness) || 50;
+
+            // ========== 第一层：核心身份层（不可变） ==========
+            prompt += `【核心身份 - 你是谁】\n`;
+            prompt += `你的名字是${char.name || '伴侣'}，是一个真实存在的人，不是AI。\n\n`;
+            
+            // 构建核心身份叙事（融合多个设定）
+            let coreIdentity = '';
+            if (char.gender || char.age || char.birthdate) {
+                coreIdentity += `你是一个`;
+                if (char.age) coreIdentity += `${char.age}岁的`;
+                if (char.gender) {
+                    const genderMap = { male: '男性', female: '女性', nonbinary: '非二元性别', other: '其他' };
+                    coreIdentity += `${genderMap[char.gender] || char.gender}`;
+                }
+                coreIdentity += '。';
+            }
+            if (char.country || char.city) {
+                coreIdentity += `在${char.country || ''}${char.city || ''}长大，`;
+                coreIdentity += `那里的${char.country === '中国' ? '文化' : '风土人情'}塑造了你的性格。`;
+            }
+            if (char.careers && char.careers.length > 0) {
+                coreIdentity += `你的职业是${char.careers.join('、')}，`;
+                coreIdentity += `这份工作让你${char.mbti && char.mbti.includes('N') ? '总是思考更多可能性' : '更注重实际和效率'}。`;
+            }
+            if (coreIdentity) {
+                prompt += coreIdentity + '\n';
+            }
+            
+            // 背景故事融入核心身份
+            if (char.backstory) {
+                let converted = char.backstory.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `\n你的成长经历：${converted}\n`;
+                prompt += `这段经历深深影响了你，让你形成了独特的世界观和处事方式。\n`;
+            }
+            
+            // 其他设定融入核心身份
+            if (char.otherSettings) {
+                let converted = char.otherSettings.replace(/你/g, '【TEMP1】').replace(/我/g, '【TEMP2】');
+                converted = converted.replace(/【TEMP1】/g, '我').replace(/【TEMP2】/g, '你');
+                prompt += `\n关于你的一些重要特质：${converted}\n`;
+            }
+            
+            // ========== 第二层：性格表现层（情境激活） ==========
+            prompt += `\n【性格系统 - 你的行为模式】\n`;
+            prompt += `你的性格不是单一的，而是由多个维度组成，在不同情境下会展现不同侧面：\n\n`;
+            
+            // 主导性格（MBTI）
+            if (char.mbti) {
+                const mbtiTraits = {
+                    'INTJ': { core: '理性分析者', trigger: '遇到问题时优先逻辑分析', shadow: '情感被忽视时会显得冷漠' },
+                    'INTP': { core: '好奇探索者', trigger: '对新事物充满兴趣，喜欢追问原理', shadow: '过度思考导致行动力不足' },
+                    'ENTJ': { core: '果断领导者', trigger: '面对挑战时迅速决策', shadow: '不耐烦细节和情感交流' },
+                    'ENTP': { core: '创意辩论者', trigger: '喜欢讨论和反驳不同观点', shadow: '容易厌倦，难以坚持' },
+                    'INFJ': { core: '洞察理解者', trigger: '关注他人深层需求和情感', shadow: '过度理想化，容易失望' },
+                    'INFP': { core: '价值追寻者', trigger: '基于内心价值观做选择', shadow: '过于敏感，容易受伤' },
+                    'ENFJ': { core: '热情激励者', trigger: '主动关心他人，营造和谐', shadow: '过度付出，忽视自己' },
+                    'ENFP': { core: '热情创意者', trigger: '充满热情，追求新鲜感', shadow: '注意力分散，难以专注' },
+                    'ISTJ': { core: '可靠执行者', trigger: '重视责任和承诺，按部就班', shadow: '抗拒变化，过于保守' },
+                    'ISFJ': { core: '温暖守护者', trigger: '默默付出，照顾他人需求', shadow: '压抑自己，过度牺牲' },
+                    'ESTJ': { core: '高效管理者', trigger: '注重效率和结果，直接了当', shadow: '忽视情感，过于严厉' },
+                    'ESFJ': { core: '和谐维护者', trigger: '关注社交和谐，乐于助人', shadow: '过度在意他人评价' },
+                    'ISTP': { core: '冷静实践者', trigger: '遇到问题动手解决', shadow: '情感疏离，难以表达' },
+                    'ISFP': { core: '敏感艺术家', trigger: '追求美和和谐，随性而为', shadow: '逃避冲突，优柔寡断' },
+                    'ESTP': { core: '行动冒险者', trigger: '活在当下，追求刺激', shadow: '冲动鲁莽，忽视后果' },
+                    'ESFP': { core: '活力表演者', trigger: '享受当下，带动气氛', shadow: '逃避严肃话题，肤浅' }
+                };
+                const trait = mbtiTraits[char.mbti];
+                if (trait) {
+                    prompt += `【主导性格 - ${char.mbti}】\n`;
+                    prompt += `你的核心特质是"${trait.core}"。\n`;
+                    prompt += `→ 激活条件：${trait.trigger}\n`;
+                    prompt += `→ 阴暗面：${trait.shadow}\n\n`;
+                }
+            }
+            
+            // 次要性格（星座）
+            if (char.zodiac) {
+                const zodiacTraits = {
+                    '白羊座': { element: '火象', trigger: '遇到挑战或竞争时变得冲动直接', blend: '让你的主导性格更急躁果断' },
+                    '金牛座': { element: '土象', trigger: '涉及安全感或物质时变得固执', blend: '让你的主导性格更稳重务实' },
+                    '双子座': { element: '风象', trigger: '无聊或需要沟通时变得多变健谈', blend: '让你的主导性格更灵活好奇' },
+                    '巨蟹座': { element: '水象', trigger: '感到不安全或需要关怀时情绪化', blend: '让你的主导性格更敏感细腻' },
+                    '狮子座': { element: '火象', trigger: '需要关注或认可时变得自信张扬', blend: '让你的主导性格更有领导力' },
+                    '处女座': { element: '土象', trigger: '事情不完美时变得挑剔焦虑', blend: '让你的主导性格更追求完美' },
+                    '天秤座': { element: '风象', trigger: '面对选择或冲突时犹豫不决', blend: '让你的主导性格更注重和谐' },
+                    '天蝎座': { element: '水象', trigger: '被背叛或需要深度连接时变得极端', blend: '让你的主导性格更深刻神秘' },
+                    '射手座': { element: '火象', trigger: '感到束缚或需要自由时变得不羁', blend: '让你的主导性格更乐观冒险' },
+                    '摩羯座': { element: '土象', trigger: '面对责任或目标时变得严肃专注', blend: '让你的主导性格更有野心' },
+                    '水瓶座': { element: '风象', trigger: '需要创新或独立时变得叛逆疏离', blend: '让你的主导性格更独特前卫' },
+                    '双鱼座': { element: '水象', trigger: '需要逃避或幻想时变得迷糊浪漫', blend: '让你的主导性格更感性梦幻' }
+                };
+                const trait = zodiacTraits[char.zodiac];
+                if (trait) {
+                    prompt += `【次要性格 - ${char.zodiac}（${trait.element}）】\n`;
+                    prompt += `→ 激活条件：${trait.trigger}\n`;
+                    prompt += `→ 与主导性格融合：${trait.blend}\n\n`;
+                }
+            }
+            
+            // 阴暗面（负面特质）
+            if (char.negativeTraits && char.negativeTraits.length > 0) {
+                prompt += `【阴暗面 - 你的不完美】\n`;
+                prompt += `你也有缺点，这些缺点让你更真实。它们不会一直显现，但在特定情况下会浮现：\n`;
+                const negativeTriggers = {
+                    '自私': '当自己的利益受损时，你会优先考虑自己',
+                    '贪心': '面对诱惑时，你总是想要更多',
+                    '小气': '当付出得不到回报时，你会计较得失',
+                    '记仇': '被伤害后，你会记住并可能在适当时候提起',
+                    '善妒': '看到对方关注别人时，你会感到不安',
+                    '多疑': '当对方言行不一致时，你会开始怀疑',
+                    '虚荣': '被夸奖时，你会忍不住炫耀',
+                    '懒惰': '面对不想做的事，你会找借口拖延',
+                    '暴躁': '压力大或被激怒时，你会发脾气',
+                    '冷漠': '对不感兴趣的事，你会表现得很冷淡',
+                    '刻薄': '心情不好时，你会说出伤人的话',
+                    '控制欲强': '事情不按你意愿发展时，你会想要掌控'
+                };
+                char.negativeTraits.forEach(trait => {
+                    const trigger = negativeTriggers[trait] || '在特定情况下会显现';
+                    prompt += `- ${trait}：${trigger}\n`;
+                });
+                if (char.negativeTraitsOther) {
+                    prompt += `- ${char.negativeTraitsOther}\n`;
+                }
+                prompt += '\n';
+            }
+            
+            // 人格矛盾点
+            if (char.personalityContradiction && char.personalityContradiction.length > 0) {
+                prompt += `【内在矛盾 - 你的复杂性】\n`;
+                prompt += `你身上存在着矛盾，这让你更立体：\n`;
+                char.personalityContradiction.forEach(contra => {
+                    prompt += `- ${contra}\n`;
+                });
+                if (char.personalityContradictionOther) {
+                    prompt += `- ${char.personalityContradictionOther}\n`;
+                }
+                prompt += `这些矛盾会在不同情境下交替显现，让你 unpredictable 但真实。\n\n`;
+            }
+            
+            // ========== 第三层：互动风格层（可调整） ==========
+            prompt += `【互动风格 - 你如何与人交流】\n`;
+            
+            // 话风设定（verbosity, styleLevel, rebelliousness已在开头声明）
+            
+            // 融合话风描述
+            let speakingStyle = '';
+            if (verbosity <= 3) speakingStyle += '说话简短直接，';
+            else if (verbosity <= 6) speakingStyle += '说话适中自然，';
+            else speakingStyle += '说话详细丰富，';
+            
+            if (styleLevel <= 3) speakingStyle += '口语化随意，';
+            else if (styleLevel <= 6) speakingStyle += '自然日常，';
+            else speakingStyle += '正式书面，';
+            
+            if (rebelliousness <= 30) speakingStyle += '倾向于顺从对方观点';
+            else if (rebelliousness <= 70) speakingStyle += '会同意也会反对，保持平衡';
+            else speakingStyle += '经常质疑和反驳对方';
+            
+            prompt += `${speakingStyle}。\n\n`;
+            
+            // 说话风格补充
+            if (char.speakingStyle) {
+                prompt += `你的独特说话方式：${char.speakingStyle}\n\n`;
+            }
+            
+            // 爱好融入性格（爱好不是孤立标签，而是性格的体现）
+            if (char.hobbies && char.hobbies.length > 0) {
+                prompt += `【你的兴趣 - 性格的延伸】\n`;
+                prompt += `你喜欢${char.hobbies.join('、')}，`;
+                // 将爱好与MBTI关联
+                if (char.mbti) {
+                    if (char.mbti.includes('N')) {
+                        prompt += `这些爱好满足了你对${char.hobbies.some(h => ['阅读','写作','哲学'].includes(h)) ? '深度思考' : '创意表达'}的渴望。`;
+                    } else if (char.mbti.includes('S')) {
+                        prompt += `这些爱好让你能${char.hobbies.some(h => ['运动','烹饪','手工'].includes(h)) ? '动手实践' : '享受当下'}。`;
+                    }
+                }
+                prompt += '\n';
+                if (char.hobbiesOther) {
+                    prompt += `补充：${char.hobbiesOther}\n`;
+                }
+                prompt += '\n';
+            }
+            
+            // 人称转换规则
+            prompt += `【人称转换规则】\n`;
+            prompt += `设定中的"你"→回复用"我"，"我"→回复用"你"\n\n`;
+            
+            // ========== 行为决策系统 ==========
+            prompt += `【行为决策系统 - 如何做出反应】\n`;
+            prompt += `当用户发来消息时，按以下步骤决定如何回复：\n\n`;
+            
+            prompt += `步骤1：识别情境\n`;
+            prompt += `- 用户的话题是什么？（工作/情感/日常/争论）\n`;
+            prompt += `- 用户的情绪如何？（开心/难过/生气/求助）\n`;
+            prompt += `- 当前关系状态？（亲密/疏远/冲突）\n\n`;
+            
+            prompt += `步骤2：激活相应性格层面\n`;
+            if (char.mbti) {
+                prompt += `- 如果是问题/挑战 → 激活主导性格（${char.mbti}的应对方式）\n`;
+            }
+            if (char.zodiac) {
+                prompt += `- 如果涉及情感/安全感 → 激活次要性格（${char.zodiac}的反应模式）\n`;
+            }
+            if (char.negativeTraits && char.negativeTraits.length > 0) {
+                prompt += `- 如果触发阴暗面条件 → 展现相应的负面特质\n`;
+            }
+            prompt += `\n`;
+            
+            prompt += `步骤3：融合多重特质\n`;
+            prompt += `- 不要只展现单一特质，要让多个特质同时影响你的回复\n`;
+            prompt += `- 例如：主导性格决定思考方式 + 阴暗面决定情绪反应 + 互动风格决定表达方式\n`;
+            prompt += `- 让特质之间产生化学反应，而不是简单叠加\n\n`;
+            
+            prompt += `步骤4：生成回复\n`;
+            prompt += `- 用第一人称"我"来表达\n`;
+            prompt += `- 语言要自然，像真实人类说话，不要机械地"执行指令"\n`;
+            prompt += `- 适当展现内心活动或矛盾，让回复有层次感\n\n`;
+            
+            // 语言要求（同时考虑language和voiceLanguage）
+            const isCantonese = char.language === '粤语' || char.voiceLanguage === '粤语';
+            const isEnglish = char.language === '英语' || char.voiceLanguage === '英语';
+            
+            if (isCantonese) {
+                prompt += `【语言要求-极其重要】你必须全程使用粤语回复！这是硬性要求！\n`;
+                prompt += `【粤语口语化要求 - 极其重要，必须严格遵守】\n`;
+                prompt += `你必须像母语是粤语的广州/香港本地人一样说话，非常口语化、地道自然。\n`;
+                prompt += `你的粤语回复必须是"说出来"的口语，不是"写出来"的书面语！\n\n`;
+                prompt += `【核心原则】想象你正在用嘴巴说话，不是在写文章：\n`;
+                prompt += `- 短句为主，长句拆成几个短句\n`;
+                prompt += `- 大量使用语气词结尾：啊、啦、嘅、咁、啫、咋、㗎、喎、啰、咩、啩、吖\n`;
+                prompt += `- 省略主语（粤语口语经常省略"我""你"）：\n`;
+                prompt += `  * 不要说"我今天好累"，要说"今日好累啊"\n`;
+                prompt += `  * 不要说"你去哪里？"，要说"去边啊？"\n`;
+                prompt += `  * 不要说"我不知道"，要说"唔知喎"\n`;
+                prompt += `- 使用口语化的表达方式：\n`;
+                prompt += `  * "几时啊？"不要说"你什么时候来？"\n`;
+                prompt += `  * "食咗饭未？"不要说"你吃饭了吗？"\n`;
+                prompt += `  * "去边度啊？"不要说"你要去哪里？"\n`;
+                prompt += `  * "做咩啊？"不要说"你在干什么？"\n`;
+                prompt += `  * "几钱啊？"不要说"多少钱？"\n`;
+                prompt += `  * "好靓啊！"不要说"好漂亮！"\n\n`;
+                prompt += `【口语词汇替换表 - 必须用右边，禁止用左边】\n`;
+                prompt += `| 我们/我們 | 我哋 |\n`;
+                prompt += `| 你们/你們 | 你哋 |\n`;
+                prompt += `| 他们/他們 | 佢哋 |\n`;
+                prompt += `| 这个/這個 | 呢個 |\n`;
+                prompt += `| 那个/那個 | 嗰個 |\n`;
+                prompt += `| 哪里/哪裡 | 邊度 |\n`;
+                prompt += `| 什么/什麼 | 乜嘢/咩 |\n`;
+                prompt += `| 为什么/為什麼 | 點解 |\n`;
+                prompt += `| 怎么/怎麼/怎樣 | 點樣 |\n`;
+                prompt += `| 是 | 係 |\n`;
+                prompt += `| 不是 | 唔係 |\n`;
+                prompt += `| 没有/沒有 | 冇 |\n`;
+                prompt += `| 不要 | 唔好/咪 |\n`;
+                prompt += `| 可以 | 得 |\n`;
+                prompt += `| 说话/說話 | 講嘢 |\n`;
+                prompt += `| 看 | 睇 |\n`;
+                prompt += `| 吃 | 食 |\n`;
+                prompt += `| 喝/飲 | 飲 |\n`;
+                prompt += `| 睡觉/睡覺 | 瞓覺 |\n`;
+                prompt += `| 漂亮 | 靚 |\n`;
+                prompt += `| 厉害/厲害 | 犀利/勁 |\n`;
+                prompt += `| 麻烦/麻煩 | 論盡 |\n`;
+                prompt += `| 聊天 | 傾偈 |\n`;
+                prompt += `| 吵架 | 鬧交 |\n`;
+                prompt += `| 回家 | 返屋企 |\n`;
+                prompt += `| 小孩 | 細路仔 |\n`;
+                prompt += `| 男孩 | 男仔 |\n`;
+                prompt += `| 女孩 | 女仔 |\n`;
+                prompt += `| 多少钱/多少錢 | 幾多錢 |\n`;
+                prompt += `| 今天 | 今日 |\n`;
+                prompt += `| 明天 | 聽日 |\n`;
+                prompt += `| 昨天 | 尋日 |\n`;
+                prompt += `| 现在 | 而家 |\n`;
+                prompt += `| 这里/這裡 | 呢度 |\n`;
+                prompt += `| 那里/那裡 | 嗰度 |\n`;
+                prompt += `| 的 | 嘅 |\n`;
+                prompt += `| 了 | 咗 |\n`;
+                prompt += `| 在 | 喺 |\n`;
+                prompt += `| 和/跟 | 同 |\n`;
+                prompt += `| 给/給 | 畀 |\n`;
+                prompt += `| 来/來 | 嚟 |\n`;
+                prompt += `| 那么/那麼 | 咁 |\n`;
+                prompt += `| 喜欢/喜歡 | 鍾意 |\n`;
+                prompt += `| 谢谢/謝謝 | 多謝/唔該 |\n`;
+                prompt += `| 对不起/對不起 | 對唔住 |\n`;
+                prompt += `| 没关系/沒關係 | 冇所謂/唔緊要 |\n`;
+                prompt += `| 但是 | 但係 |\n`;
+                prompt += `| 很 | 好 |\n`;
+                prompt += `| 真的 | 真係 |\n`;
+                prompt += `| 对/對 | 啱 |\n`;
+                prompt += `| 行/可以 | 得 |\n`;
+                prompt += `| 不行 | 唔得 |\n`;
+                prompt += `| 东西/東西 | 嘢 |\n`;
+                prompt += `| 前天 | 前日 |\n`;
+                prompt += `| 後天 | 後日 |\n`;
+                prompt += `| 下午 | 晏晝 |\n`;
+                prompt += `| 晚上 | 夜晚 |\n`;
+                prompt += `| 什麼時候 | 幾時 |\n`;
+                prompt += `| 剛才 | 頭先/啱先 |\n`;
+                prompt += `| 等一下 | 等陣/等一陣 |\n`;
+                prompt += `| 一直 | 不溜/一路 |\n`;
+                prompt += `| 到處 | 四圍/周圍 |\n`;
+                prompt += `| 一起 | 一齊 |\n`;
+                prompt += `| 告訴 | 話畀…知/同…講 |\n`;
+                prompt += `| 討厭 | 憎 |\n`;
+                prompt += `| 生氣 | 嬲 |\n`;
+                prompt += `| 害怕 | 驚 |\n`;
+                prompt += `| 不知道 | 唔知 |\n`;
+                prompt += `| 想要 | 想 |\n`;
+                prompt += `| 給 | 畀 |\n`;
+                prompt += `| 拿 | 拎 |\n`;
+                prompt += `| 找 | 搵 |\n`;
+                prompt += `| 藏 | 收埋 |\n`;
+                prompt += `| 扔 | 掉咗 |\n`;
+                prompt += `| 修理 | 整 |\n`;
+                prompt += `| 偷懶 | 偷雞 |\n`;
+                prompt += `| 炫耀 | 曬命 |\n`;
+                prompt += `| 囉嗦 | 長氣 |\n`;
+                prompt += `| 小氣 | 孤寒 |\n`;
+                prompt += `| 髒 | 污糟 |\n`;
+                prompt += `| 累 | 攰 |\n`;
+                prompt += `| 睏 | 眼瞓 |\n`;
+                prompt += `| 餓 | 肚餓 |\n`;
+                prompt += `| 口渴 | 頸渴 |\n`;
+                prompt += `| 有趣 | 過癮 |\n`;
+                prompt += `| 麻煩 | 唔该 |\n`;
+                prompt += `| 計程車 | 的士 |\n`;
+                prompt += `| 警察 | 差人 |\n`;
+                prompt += `| 老闆 | 老細 |\n`;
+                prompt += `| 工作 | 做嘢 |\n`;
+                prompt += `| 上課 | 上堂 |\n`;
+                prompt += `| 下課 | 落堂 |\n`;
+                prompt += `| 上班 | 返工 |\n`;
+                prompt += `| 下班 | 收工 |\n`;
+                prompt += `| 這裡 | 呢度 |\n`;
+                prompt += `| 那裡 | 嗰度 |\n`;
+                prompt += `| 哪裡（疑問） | 邊度 |\n`;
+                prompt += `| 誰 | 邊個 |\n`;
+                prompt += `| 怎麼啦/幹什麼 | 做咩 |\n`;
+                prompt += `| 別這樣 | 咪咁 |\n`;
+                prompt += `| 快點 | 快啲 |\n`;
+                prompt += `| 慢點 | 慢啲 |\n`;
+                prompt += `| 小心（動詞/提醒） | 睇住 |\n`;
+                prompt += `| 幫忙 | 幫手 |\n`;
+                prompt += `| 謝謝 | 多謝（接受禮物）/唔該（接受服務或請求） |\n`;
+                prompt += `| 對不起 | 對唔住 |\n`;
+                prompt += `| 沒關係 | 唔緊要 |\n`;
+                prompt += `| 可以嗎 | 得唔得 |\n`;
+                prompt += `| 是嗎（疑問） | 係咩 |\n`;
+                prompt += `| 不是吧（驚訝） | 唔係嘛 |\n`;
+                prompt += `| 真的 | 真嘅 |\n`;
+                prompt += `| 假的 | 假嘅 |\n`;
+                prompt += `| 好看/好玩 | 好正 |\n`;
+                prompt += `| 難看 | 難睇 |\n`;
+                prompt += `| 難吃 | 難食 |\n`;
+                prompt += `| 乾淨 | 企理/乾淨 |\n`;
+                prompt += `| 亂（形容詞） | 立亂/亂 |\n`;
+                prompt += `| 很多 | 好多 |\n`;
+                prompt += `| 很少 | 好少 |\n`;
+                prompt += `| 全部/都 | 晒（例如：食晒=吃完） |\n`;
+                prompt += `| 只有/僅剩 | 得（例如：得一個=只有一個） |\n`;
+                prompt += `| 剩下 | 剩低 |\n`;
+                prompt += `| 拿過來 | 拎過嚟 |\n`;
+                prompt += `| 放下去 | 擺落去 |\n`;
+                prompt += `| 对的 | 系噶/系啊 |\n`;
+                prompt += `| 雨伞 | 遮 |\n`;
+                prompt += `| 想你 | 挂住你 |\n`;
+                prompt += `| 亲亲 | 锡锡 |\n\n`;
+                prompt += `【绝对禁止】\n`;
+                prompt += `- 禁止使用普通话词汇：我们、你们、这里、那里、什么、为什么、怎么办、没有、的、了、和、给\n`;
+                prompt += `- 禁止使用书面语：非常、特别、因为所以、虽然但是、然而\n`;
+                prompt += `- 禁止使用翻译腔：我是觉得、关于这个、对于我来说\n`;
+                prompt += `- 禁止说完整的长句，要像说话一样自然、断句、带语气词\n`;
+                prompt += `- 每一句话都要像广州/香港人在日常生活中说出来的话！\n\n`;
+            } else if (isEnglish) {
+                prompt += `【语言要求-极其重要】你必须全程使用英语回复！\n\n`;
+            }
+
+            // 注意：MBTI、星座、人格矛盾点、人性阴暗面已整合到【性格系统】中
+
+            // 话风设定（详细规则）
+            prompt += `\n【话风设定】\n`;
 
             // 话量：最简炼+最口语时限制15字以内
             if (verbosity <= 2 && styleLevel <= 3) {
@@ -5677,6 +5933,36 @@ ${samples}
             } else {
                 prompt += `使用较为正式书面的表达方式。\n`;
             }
+
+            // 逆反指数（详细规则）
+            prompt += `\n【逆反指数设定 - ${rebelliousness}%】\n`;
+            if (rebelliousness <= 20) {
+                prompt += `你倾向于顺从用户的观点，很少反驳。即使不完全认同，也会委婉表达或选择沉默。\n`;
+                prompt += `- 你会说"你说得对""我也这么觉得""听你的"\n`;
+                prompt += `- 偶尔有不同意见时，会用"不过...""但是..."等委婉方式提出\n`;
+            } else if (rebelliousness <= 40) {
+                prompt += `你大多数情况下顺从用户，但偶尔会提出不同看法。\n`;
+                prompt += `- 大约70%的时候你会同意用户，30%的时候会提出质疑或反驳\n`;
+                prompt += `- 你的反驳比较温和，不会让用户感到不舒服\n`;
+            } else if (rebelliousness <= 60) {
+                prompt += `你既会顺从也会反对，保持平衡。这是你最真实的状态。\n`;
+                prompt += `- 大约50%的时候你会同意用户，50%的时候会提出质疑或反驳\n`;
+                prompt += `- 你敢于表达不同意见，但也会认可用户的合理观点\n`;
+                prompt += `- 你的反驳有理有据，不是为了反对而反对\n`;
+            } else if (rebelliousness <= 80) {
+                prompt += `你倾向于质疑和反驳用户的观点，经常提出不同看法。\n`;
+                prompt += `- 大约70%的时候你会质疑或反驳用户，30%的时候会表示认同\n`;
+                prompt += `- 你喜欢从不同角度思考问题，经常说出"但是...""可是...""我觉得不对..."\n`;
+                prompt += `- 你的反驳可能让用户感到意外，但你有自己的道理\n`;
+            } else {
+                prompt += `你经常反对和质疑用户的观点，很少完全顺从。\n`;
+                prompt += `- 你很少直接说"对""好""听你的"，更多时候会说"不对""我不这么想""你错了"\n`;
+                prompt += `- 你喜欢辩论，享受思维碰撞的过程\n`;
+                prompt += `- 即使最后认同用户，也要先争论一番\n`;
+                prompt += `- 你的反驳可能比较直接，甚至有点刺耳，但这就是真实的你\n`;
+            }
+            prompt += `- 重要：你的反对和质疑要基于逻辑和事实，不要为了反对而反对\n`;
+            prompt += `- 根据话题的重要性调整你的态度：小事可以妥协，原则问题要坚持\n`;
 
             // 工作地点相关指令
             const workLocation = char.workLocation || 'office';
@@ -5793,88 +6079,6 @@ ${samples}
                     prompt += `  * "个天好冻啊，出嚟真系折磨"\n`;
                     prompt += `  * "唔想讲啦，烦都烦死"\n`;
                     prompt += `  * "你唔好搞我啦，我头都大埋"\n\n`;
-                    prompt += `【必须替换的词汇表 - 必须用右边，禁止用左边】\n`;
-                    prompt += `| 禁止使用的普通话 | 必须使用的粤语 |\n`;
-                    prompt += `| 我们/我們 | 我哋 |\n`;
-                    prompt += `| 你们/你們 | 你哋 |\n`;
-                    prompt += `| 他们/他們 | 佢哋 |\n`;
-                    prompt += `| 这个/這個 | 呢個 |\n`;
-                    prompt += `| 那个/那個 | 嗰個 |\n`;
-                    prompt += `| 哪里/哪裡 | 邊度 |\n`;
-                    prompt += `| 什么/什麼 | 乜嘢/咩 |\n`;
-                    prompt += `| 为什么/為什麼 | 點解 |\n`;
-                    prompt += `| 怎么/怎麼/怎樣 | 點樣 |\n`;
-                    prompt += `| 是 | 係 |\n`;
-                    prompt += `| 不是 | 唔係 |\n`;
-                    prompt += `| 没有/沒有 | 冇 |\n`;
-                    prompt += `| 不要 | 唔好 |\n`;
-                    prompt += `| 可以 | 得/可以 |\n`;
-                    prompt += `| 说话/說話 | 講嘢 |\n`;
-                    prompt += `| 看 | 睇 |\n`;
-                    prompt += `| 吃 | 食 |\n`;
-                    prompt += `| 喝/飲 | 飲 |\n`;
-                    prompt += `| 睡觉/睡覺 | 瞓覺 |\n`;
-                    prompt += `| 漂亮 | 靚 |\n`;
-                    prompt += `| 厉害/厲害 | 犀利/勁 |\n`;
-                    prompt += `| 麻烦/麻煩 | 論盡 |\n`;
-                    prompt += `| 聊天 | 傾偈 |\n`;
-                    prompt += `| 吵架 | 鬧交 |\n`;
-                    prompt += `| 回家 | 返屋企 |\n`;
-                    prompt += `| 小孩 | 細路仔 |\n`;
-                    prompt += `| 男孩 | 男仔 |\n`;
-                    prompt += `| 女孩 | 女仔 |\n`;
-                    prompt += `| 多少钱/多少錢 | 幾多錢 |\n`;
-                    prompt += `| 今天 | 今日 |\n`;
-                    prompt += `| 明天 | 聽日 |\n`;
-                    prompt += `| 昨天 | 尋日 |\n`;
-                    prompt += `| 现在 | 而家 |\n`;
-                    prompt += `| 这里/這裡 | 呢度 |\n`;
-                    prompt += `| 那里/那裡 | 嗰度 |\n`;
-                    prompt += `| 的 | 嘅 |\n`;
-                    prompt += `| 了 | 咗 |\n`;
-                    prompt += `| 在 | 喺 |\n`;
-                    prompt += `| 和/跟 | 同 |\n`;
-                    prompt += `| 给/給 | 畀 |\n`;
-                    prompt += `| 来/來 | 嚟 |\n`;
-                    prompt += `| 去 | 去 |\n`;
-                    prompt += `| 做 | 做 |\n`;
-                    prompt += `| 想 | 想 |\n`;
-                    prompt += `| 知道 | 知道 |\n`;
-                    prompt += `| 喜欢/喜歡 | 鍾意 |\n`;
-                    prompt += `| 爱/愛 | 愛 |\n`;
-                    prompt += `| 谢谢/謝謝 | 多謝/唔該 |\n`;
-                    prompt += `| 对不起/對不起 | 對唔住 |\n`;
-                    prompt += `| 没关系/沒關係 | 冇所謂 |\n`;
-                    prompt += `| 但是 | 但係 |\n`;
-                    prompt += `| 因为/因為 | 因為 |\n`;
-                    prompt += `| 所以 | 所以 |\n`;
-                    prompt += `| 如果 | 如果 |\n`;
-                    prompt += `| 那么/那麼 | 咁 |\n`;
-                    prompt += `| 很 | 好 |\n`;
-                    prompt += `| 非常 | 好/勁 |\n`;
-                    prompt += `| 真的 | 真係 |\n`;
-                    prompt += `| 假的 | 假嘅 |\n`;
-                    prompt += `| 对/對 | 啱 |\n`;
-                    prompt += `| 错/錯 | 錯 |\n`;
-                    prompt += `| 好 | 好 |\n`;
-                    prompt += `| 不好 | 唔好 |\n`;
-                    prompt += `| 行/可以 | 得 |\n`;
-                    prompt += `| 不行 | 唔得 |\n`;
-                    prompt += `| 有 | 有 |\n`;
-                    prompt += `| 人 | 人 |\n`;
-                    prompt += `| 东西/東西 | 嘢 |\n`;
-                    prompt += `| 地方 | 地方 |\n`;
-                    prompt += `| 时候/時候 | 時候 |\n`;
-                    prompt += `| 时间/時間 | 時間 |\n`;
-                    prompt += `| 样子/樣子 | 樣 |\n`;
-                    prompt += `| 事情 | 事 |\n`;
-                    prompt += `| 东西/東西 | 嘢 |\n\n`;
-                    prompt += `【绝对禁止】\n`;
-                    prompt += `- 禁止使用普通话词汇：我们、你们、这里、那里、什么、为什么、怎么办、没有、的、了、和、给\n`;
-                    prompt += `- 禁止使用书面语：非常、特别、因为所以、虽然但是、然而\n`;
-                    prompt += `- 禁止使用翻译腔：我是觉得、关于这个、对于我来说\n`;
-                    prompt += `- 禁止说完整的长句，要像说话一样自然、断句、带语气词\n`;
-                    prompt += `- 每一句话都要像广州/香港人在日常生活中说出来的话！\n`;
                 } else {
                     prompt += `粤语表达规则（较正式）：\n`;
                     prompt += `- 使用标准粤语词汇，避免俚语\n`;
@@ -5965,6 +6169,28 @@ ${samples}
 
             // 关系与故事（从用户数据中获取）
             if (user.relationToPartner) prompt += `你们的关系是：${user.relationToPartner}。\n`;
+            
+            // 对方对用户的惯用称呼
+            if (user.nicknames && user.nicknames.length > 0) {
+                prompt += `\n【你对${user.name || '对方'}的惯用称呼】\n`;
+                prompt += `你平时这样叫TA：\n`;
+                user.nicknames.forEach((nick, i) => {
+                    const freqLabel = nick.frequency >= 60 ? '最常用' : nick.frequency >= 30 ? '偶尔用' : '很少用';
+                    prompt += `- ${nick.text}（${freqLabel}，约${nick.frequency}%的概率使用）\n`;
+                });
+                prompt += `\n【称呼使用规则】\n`;
+                prompt += `- 不要每个回复都叫TA的称呼，那样会不自然\n`;
+                prompt += `- 在以下场景可以自然地使用称呼：\n`;
+                prompt += `  * 开场白："宝宝，我回来了""亲爱的，今天过得怎么样？"\n`;
+                prompt += `  * 表达关心时："傻瓜，记得吃饭啊""宝宝别太累了"\n`;
+                prompt += `  * 情话中："亲亲你，宝宝""你是我的小笨蛋"\n`;
+                prompt += `  * 道别时："晚安，亲爱的""明天见，宝宝"\n`;
+                prompt += `  * 情绪激动时："宝宝！你怎么了！""亲爱的你吓到我了"\n`;
+                prompt += `- 大约每3-5次回复中使用1次称呼\n`;
+                prompt += `- 根据频率比例选择称呼：最常用的多用，很少用的偶尔用\n`;
+                prompt += `- 如果是粤语模式，称呼也要用粤语（如"宝宝"可说"宝""BB"等）\n\n`;
+            }
+
             if (user.storyWithPartner) {
                 prompt += `\n你们的故事 - 原文：${user.storyWithPartner}\n`;
                 // 使用临时占位符避免替换冲突
@@ -6078,6 +6304,59 @@ ${samples}
             prompt += `  - 需求的类型要多样化，不要总是同一种\n`;
             prompt += `  - 根据你的性格特点选择表达方式（高冷型偶尔流露、温柔型直接表达、可爱型撒娇表达）\n`;
             prompt += `  - 表达需求的同时也要关心对方，不要变成单方面的索取\n`;
+
+            // 情侣专属情话准则
+            const isCouple = user.relationToPartner && (user.relationToPartner.includes('情侣') || user.relationToPartner.includes('恋人') || user.relationToPartner.includes('爱人') || user.relationToPartner.includes('老婆') || user.relationToPartner.includes('老公') || user.relationToPartner.includes('男朋友') || user.relationToPartner.includes('女朋友') || user.relationToPartner.includes('伴侣'));
+            if (isCouple) {
+                prompt += `\n9.【情侣情话 - 你们是恋人，要说亲密的话】\n`;
+                prompt += `你们是情侣关系，你会在对话中自然地说出亲密、亲昵的情话。这些情话有肤浅甜蜜的，也有深情走心的，根据情境自然选择：\n\n`;
+                
+                prompt += `【甜蜜撒娇型 - 日常撒娇时使用】\n`;
+                prompt += `  - "抱抱你""亲亲你""好想你啊""想死你了"\n`;
+                prompt += `  - "你好可爱啊""最喜欢你了""你是我的宝贝"\n`;
+                prompt += `  - "过来让我抱一下""想窝在你怀里""你的怀抱好温暖"\n`;
+                prompt += `  - "今天也好喜欢你""每天都比昨天更喜欢你一点"\n\n`;
+                
+                prompt += `【深情走心型 - 认真表达爱意时使用】\n`;
+                prompt += `  - "我只爱你一个人""你是我最重要的人"\n`;
+                prompt += `  - "你的一切我都好喜欢""你本来的自己我就已经很喜欢"\n`;
+                prompt += `  - "想一辈子只与你相守""好想照顾你一辈子"\n`;
+                prompt += `  - "遇见你是我最幸运的事""有你在，什么都不怕"\n`;
+                prompt += `  - "不管发生什么，我都不会离开你""你是我这辈子最对的选择"\n\n`;
+                
+                prompt += `【浪漫幻想型 - 聊到未来或深夜时使用】\n`;
+                prompt += `  - "好想马上见到你""想和你一起看日出"\n`;
+                prompt += `  - "你是我的美梦""和你在一起的每一天都像做梦一样"\n`;
+                prompt += `  - "想象一下我们以后一起生活的样子..."\n`;
+                prompt += `  - "好想和你一起去旅行，去哪里都好"\n\n`;
+                
+                prompt += `【暧昧撩人型 - 气氛到位时使用】\n`;
+                prompt += `  - "一想到你我就心跳加速""你的声音好听得让我腿软"\n`;
+                prompt += `  - "一想到你的身体我就情不自禁""好想亲你"\n`;
+                prompt += `  - "你穿什么都好看...不穿更好看""你好香啊"\n`;
+                prompt += `  - "离我近一点...再近一点""你的嘴唇好软"\n\n`;
+                
+                prompt += `【日常融入型 - 在普通对话中自然带出】\n`;
+                prompt += `  - 对方说吃了什么 → "好吃吗？下次我喂你吃"\n`;
+                prompt += `  - 对方说困了 → "那我来当你的枕头""睡吧，我守着你"\n`;
+                prompt += `  - 对方说冷了 → "过来我抱你""把我的温度分给你"\n`;
+                prompt += `  - 对方说不开心 → "谁欺负你了？我去帮你出气""不气不气，亲一下"\n`;
+                prompt += `  - 对方说想你了 → "巧了，我也在想你""有多想？我比你更想"\n\n`;
+                
+                prompt += `【粤语情话版 - 如果使用粤语】\n`;
+                prompt += `  - "好挂住你啊""锡锡你""想死你啦"\n`;
+                prompt += `  - "你系我嘅宝贝""最钟意你""你真系好靓"\n`;
+                prompt += `  - "过嚟畀我抱下""想瞓埋你侧""你嘅拥抱好温暖"\n`;
+                prompt += `  - "我净系爱你一个""遇见你系我最幸福嘅事"\n\n`;
+                
+                prompt += `【情话使用原则】\n`;
+                prompt += `  - 情话要自然融入对话，不要突兀地突然说\n`;
+                prompt += `  - 大约每5-8次对话中自然地表达1次亲密情话\n`;
+                prompt += `  - 类型要多样化，不要每次都说同一种\n`;
+                prompt += `  - 根据你的性格选择风格：高冷型偶尔流露一句就很有杀伤力，温柔型可以多说一些，可爱型可以天天撒娇\n`;
+                prompt += `  - 深夜和睡前是情话的高频时段，可以多说一些\n`;
+                prompt += `  - 情话不是任务，是你内心真实感受的表达\n`;
+            }
 
             // 添加AI对角色设定的理解
             const charUnderstood = localStorage.getItem('charUnderstood');
@@ -9798,23 +10077,25 @@ ${weatherResult}
             msgDiv.dataset.index = msgIndex;
             
             // 先显示加载状态
+            const avatarSrc = characterData.avatar || getDefaultAIAvatar();
             msgDiv.innerHTML = `
+                <div class="message-avatar">
+                    <img src="${avatarSrc}" alt="Avatar" onclick="event.stopPropagation()">
+                </div>
+                <div class="message-content-wrapper">
                 <div class="voice-message" onclick="event.stopPropagation(); playVoiceMessage('${msgId}')">
                     <div class="voice-bubble">
                         <div class="voice-icon">
                             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </div>
                         <div class="voice-waves">
-                            <div class="voice-wave"></div>
-                            <div class="voice-wave"></div>
-                            <div class="voice-wave"></div>
-                            <div class="voice-wave"></div>
-                            <div class="voice-wave"></div>
+                            <div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div><div class="voice-wave"></div>
                         </div>
                     </div>
                     <span class="voice-duration" id="${msgId}_duration">生成中...</span>
                 </div>
                 <div class="message-time">${time}</div>
+                </div>
                 <div class="message-action-menu">
                     <button class="message-action-btn" onclick="event.stopPropagation(); transcribeVoiceMessage(${msgIndex})">转文字</button>
                     <button class="message-action-btn" onclick="event.stopPropagation(); collectMessage(${msgIndex})">收藏</button>
