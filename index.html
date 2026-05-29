@@ -4880,8 +4880,8 @@
             
             // iOS Safari 需要延迟处理
             setTimeout(() => {
-                // 压缩图片
-                compressImage(file, 1200, 1200, 0.7)
+                // 压缩图片 - 降低尺寸和质量以减少token数
+                compressImage(file, 800, 800, 0.6)
                     .then(compressedBase64 => {
                         uploadedImageBase64 = compressedBase64;
                         console.log('图片压缩成功，最终大小:', uploadedImageBase64.length);
@@ -5551,7 +5551,7 @@ ${samples}
 
         // ==================== 系统提示词生成 ====================
 
-        function generateSystemPrompt(weatherInfo, partnerWeatherInfo) {
+        function generateSystemPrompt(weatherInfo, partnerWeatherInfo, isImageMode = false) {
             const char = characterData;
             const user = userData;
             const story = storyData;
@@ -5563,6 +5563,24 @@ ${samples}
             const verbosity = parseInt(char.verbosity) || 5;
             const styleLevel = parseInt(char.styleLevel) || 5;
             const rebelliousness = parseInt(char.rebelliousness) || 50;
+
+            // 图片模式：使用简化版system prompt以节省token
+            if (isImageMode) {
+                prompt += `【核心身份】${char.name || '伴侣'}，${char.gender === 'male' ? '男性' : char.gender === 'female' ? '女性' : ''}，${char.age ? char.age + '岁' : ''}。\n`;
+                if (char.mbti) prompt += `性格：${char.mbti}。\n`;
+                if (char.personality && char.personality.length > 0) prompt += `特点：${char.personality.join('、')}。\n`;
+                
+                // 语言要求（简化版）
+                const isCantonese = char.language === '粤语' || char.voiceLanguage === '粤语';
+                if (isCantonese) {
+                    prompt += `\n【语言要求】全程使用粤语回复。\n`;
+                    prompt += `必须使用：今日(今天)、一齐(一起)、同(和/跟)、嘅(的)、咗(了)、喺(在)。\n`;
+                    prompt += `禁止使用普通话词汇。\n\n`;
+                }
+                
+                prompt += `【任务】用户发了一张图片给你，请用第一人称描述你看到的内容，并自然地回应。\n`;
+                return prompt;
+            }
 
             // ========== 第一层：核心身份层（不可变） ==========
             prompt += `【核心身份 - 你是谁】\n`;
@@ -6218,6 +6236,51 @@ ${samples}
                     prompt += `50. "谢谢" → 必须换成 "唔该/多谢"\n`;
                     prompt += `51. "对不起" → 必须换成 "对唔住"\n`;
                     prompt += `52. "没关系" → 必须换成 "冇所谓/唔紧要"\n`;
+                    prompt += `53. "刚刚" → 必须换成 "啱啱"\n`;
+                    prompt += `54. "不"（否定词）→ 必须换成 "唔"\n`;
+                    prompt += `55. "那么" → 必须换成 "咁"\n`;
+                    prompt += `56. "家"（如"回家"）→ 必须换成 "返屋企"\n`;
+                    prompt += `57. "不用" → 必须换成 "唔使"\n`;
+                    prompt += `58. "不用谢" → 必须换成 "唔使客气"\n`;
+                    prompt += `59. "不会" → 必须换成 "唔会"\n`;
+                    prompt += `60. "不用" → 必须换成 "唔使"\n`;
+                    prompt += `61. "不错" → 必须换成 "唔错"\n`;
+                    prompt += `62. "不用心" → 必须换成 "唔上心"\n`;
+                    prompt += `63. "不好意思" → 必须换成 "唔好意思"\n`;
+                    prompt += `64. "不客气" → 必须换成 "唔使客气"\n`;
+                    prompt += `65. "不见得" → 必须换成 "唔见得"\n`;
+                    prompt += `66. "不对" → 必须换成 "唔啱/唔对"\n`;
+                    prompt += `67. "不懂" → 必须换成 "唔明"\n`;
+                    prompt += `68. "不甘心" → 必须换成 "唔忿"\n`;
+                    prompt += `69. "不情愿" → 必须换成 "唔情愿"\n`;
+                    prompt += `70. "不舒服" → 必须换成 "唔舒服"\n`;
+                    prompt += `71. "不客气" → 必须换成 "唔该"/"唔使客气"\n`;
+                    prompt += `72. "不用怕" → 必须换成 "唔使惊"\n`;
+                    prompt += `73. "不用急" → 必须换成 "唔使急"\n`;
+                    prompt += `74. "不用理" → 必须换成 "唔使理"\n`;
+                    prompt += `75. "不用管" → 必须换成 "唔使理"\n`;
+                    prompt += `76. "不用说" → 必须换成 "唔使讲"\n`;
+                    prompt += `77. "不用说" → 必须换成 "唔洗讲"\n`;
+                    prompt += `78. "不想" → 必须换成 "唔想"\n`;
+                    prompt += `79. "不要" → 必须换成 "唔好"\n`;
+                    prompt += `80. "不见" → 必须换成 "唔见"\n`;
+                    prompt += `81. "不是" → 必须换成 "唔系"\n`;
+                    prompt += `82. "不能" → 必须换成 "唔得/唔能够"\n`;
+                    prompt += `83. "不一定" → 必须换成 "唔定"\n`;
+                    prompt += `84. "不必要" → 必须换成 "唔使"\n`;
+                    prompt += `85. "不如" → 必须换成 "唔如"\n`;
+                    prompt += `86. "不料" → 必须换成 "唔知"\n`;
+                    prompt += `87. "不必" → 必须换成 "唔使"\n`;
+                    prompt += `88. "不会吧" → 必须换成 "唔系嘛"\n`;
+                    prompt += `89. "不好" → 必须换成 "唔好"\n`;
+                    prompt += `90. "不难" → 必须换成 "唔难"\n`;
+                    prompt += `91. "不一定" → 必须换成 "唔定"\n`;
+                    prompt += `92. "不过" → 必须换成 "不过/但系"\n`;
+                    prompt += `93. "那"（指示代词）→ 可能换成 "咁"（根据语境）\n`;
+                    prompt += `94. "那样" → 必须换成 "咁样"\n`;
+                    prompt += `95. "这样" → 必须换成 "咁样"\n`;
+                    prompt += `96. "这么" → 必须换成 "咁"\n`;
+                    prompt += `97. "这么样" → 必须换成 "咁样"\n`;
 
                     prompt += `\n【自我检查机制 - 生成回复后必须执行】\n`;
                     prompt += `生成回复后，你必须检查自己的回复，确保：\n`;
@@ -7791,7 +7854,9 @@ ${content}
                 console.log('获取到广州海珠区天气:', weatherInfo ? '成功' : '失败');
                 console.log('天气详情:', weatherInfo);
 
-                const systemPrompt = generateSystemPrompt(weatherInfo, partnerWeatherInfo);
+                // 有图片时使用简化版system prompt以节省token
+                const hasImage = hasUploadedImage();
+                const systemPrompt = generateSystemPrompt(weatherInfo, partnerWeatherInfo, hasImage);
                 
                 // 构建消息历史
                 const messages = [{ role: 'system', content: systemPrompt }];
@@ -7815,8 +7880,15 @@ ${content}
                         });
                     }
                     
-                    // 2. 加入最近历史消息作为上下文（有摘要时15条，无摘要时20条）
-                    const recentCount = chatSummary ? 15 : 20;
+                    // 2. 加入最近历史消息作为上下文
+                    // 有图片时减少历史消息数量，避免token超限
+                    const hasImage = hasUploadedImage();
+                    let recentCount;
+                    if (hasImage) {
+                        recentCount = 5; // 有图片时只保留最近5条
+                    } else {
+                        recentCount = chatSummary ? 15 : 20;
+                    }
                     const recentHistory = chatHistory.slice(-recentCount);
                     recentHistory.forEach(item => {
                         if (item.text) { // 只添加有文字内容的消息
