@@ -7882,7 +7882,6 @@ ${content}
                     
                     // 2. 加入最近历史消息作为上下文
                     // 有图片时减少历史消息数量，避免token超限
-                    const hasImage = hasUploadedImage();
                     let recentCount;
                     if (hasImage) {
                         recentCount = 5; // 有图片时只保留最近5条
@@ -7996,7 +7995,7 @@ ${weatherResult}
                 
                 // 使用支持视觉的模型（必须在清除图片之前判断）
                 const visionModel = 'glm-4v-flash'; // 智谱AI的免费多模态视觉模型
-                const hasImage = hasUploadedImage();
+                // hasImage已在前面声明，这里直接使用
                 const currentModel = hasImage ? visionModel : AI_MODEL;
                 
                 console.log('发送消息到模型:', currentModel);
